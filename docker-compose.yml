@@ -1,0 +1,27 @@
+services:
+  db:
+    container_name: comiket-db
+    image: mongo
+    ports:
+      - 20000:27017
+    volumes:
+      - dbdata:/data/db
+      - ./db/seed.js:/docker-entrypoint-initdb.d/seed.js:ro
+    env_file:
+      - .env
+
+  backend:
+    container_name: comiket-backend
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    working_dir: /app
+    ports:
+      - 3000:3000
+    volumes:
+      - ./:/app
+    env_file:
+      - .env
+
+volumes:
+  dbdata:
