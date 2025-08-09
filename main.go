@@ -5,34 +5,34 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
+	"strconv"
 
 	"github.com/rchhong/comiket-backend/dao"
-
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"github.com/rchhong/comiket-backend/db"
 )
 
 func main() {
 	mux := http.NewServeMux()
 
-	dao := dao.NewDAO(os.Getenv("DATABASE_URL"))
-	defer dao.Close()
+	postgresDB := db.InitializeDB()
+	defer postgresDB.Teardown()
+
+	userDAO := dao.NewUserDAO(postgresDB.Dbpool)
 
 	mux.HandleFunc("GET /user/{id}", func(w http.ResponseWriter, r *http.Request) {
-		idString := r.PathValue("id")
-
-		id, err := primitive.ObjectIDFromHex(idString)
+		id, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
 		if err != nil {
-			http.Error(w, fmt.Sprintf("Unable to decode Id %s", idString), http.StatusBadRequest)
+			log.Printf("Error converting path parameter %s: %s\n", id, err)
 		}
 
-		user, err := dao.RetrieveUserById(id)
+		user, err := userDAO.GetUserByDiscordId(id)
 		if err != nil {
-			http.Error(w, fmt.Sprintf("Unable to decode retrieve user with Id %s: %s", idString, err), http.StatusBadRequest)
+			w.WriteHeader(http.StatusNotFound)
+		} else {
+			w.WriteHeader(http.StatusAccepted)
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(user)
 		}
-		w.Header().Set("Content-Type", "application/json")
-		fmt.Printf("user: %s", user)
-		json.NewEncoder(w).Encode(user)
 
 	})
 

@@ -1,9 +1,20 @@
 # Comiket Display Backend
 
 This repository contains the backend code for the Comiket Tracker Display, written in Go.
-For now, the backend is hot-reloaded using [Air](https://github.com/air-verse/air), but later on, 2 Dockerfiles will be used so that hot-reloading doesn't occur.
+For now, the backend is hot-reloaded using [Air](https://github.com/air-verse/air).
+This is only for development purposes.
+Later on, this will be disabled.
 
 ## Set-up
+
+1. Create `.env` with the following contains
+
+```
+POSTGRES_USER=<postgres_username>
+POSTGRES_PASSWORD=<postgres_password>
+POSTGRES_DB="comiket"
+PGDATA="/var/lib/postgresql/17/docker"
+```
 
 ```{bash}
 docker compose up -d
@@ -14,3 +25,14 @@ docker compose up -d
 ```{bash}
 docker compose down
 ```
+
+# Design
+
+![](./media/sql.png)
+
+## TODO
+
+2. Create config object that populates needed fields
+3. Create scarping service for scraping URLs (https://pkg.go.dev/github.com/gocolly/colly/v2)
+4. Create DAO + service layer for Users, Reservations, Doujins
+5. testing xdd
