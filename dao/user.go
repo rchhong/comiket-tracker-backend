@@ -10,17 +10,17 @@ import (
 	"github.com/rchhong/comiket-backend/models"
 )
 
-type UserDao struct {
+type UserDAO struct {
 	dbpool *pgxpool.Pool
 }
 
-func NewUserDAO(dbpool *pgxpool.Pool) *UserDao {
-	return &UserDao{
+func NewUserDAO(dbpool *pgxpool.Pool) *UserDAO {
+	return &UserDAO{
 		dbpool: dbpool,
 	}
 }
 
-func (userDAO *UserDao) CreateUser(user models.User) (models.UserWithMetadata, error) {
+func (userDAO *UserDAO) CreateUser(user models.User) (*models.UserWithMetadata, error) {
 	var newUserWithMetadata models.UserWithMetadata
 	row, err := userDAO.dbpool.Query(context.Background(), `
 		INSERT INTO users 
@@ -30,33 +30,32 @@ func (userDAO *UserDao) CreateUser(user models.User) (models.UserWithMetadata, e
 		RETURNING *
 		`, user.Discord_Id, user.Discord_Name, user.Discord_Global_Name)
 	if err != nil {
-		return newUserWithMetadata, err
+		return nil, err
 	}
 
 	newUserWithMetadata, err = pgx.CollectOneRow(row, pgx.RowToStructByName[models.UserWithMetadata])
 	if err != nil {
-		return newUserWithMetadata, err
+		return nil, err
 	}
 
-	return newUserWithMetadata, nil
-
+	return &newUserWithMetadata, nil
 }
 
-func (userDAO *UserDao) GetUserByDiscordId(discordId int64) (models.UserWithMetadata, error) {
+func (userDAO *UserDAO) GetUserByDiscordId(discordId int64) (*models.UserWithMetadata, error) {
 	var user models.UserWithMetadata
 
 	row, err := userDAO.dbpool.Query(context.Background(), `
 		SELECT * FROM users WHERE discord_id = $1
 	`, discordId)
 	if err != nil {
-		return user, err
+		return nil, err
 	}
 	user, err = pgx.CollectOneRow(row, pgx.RowToStructByName[models.UserWithMetadata])
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return user, models.StatusError{Err: err, StatusCode: http.StatusNotFound}
+			return nil, models.StatusError{Err: err, StatusCode: http.StatusNotFound}
 		}
-		return user, err
+		return nil, err
 	}
-	return user, nil
+	return &user, nil
 }
