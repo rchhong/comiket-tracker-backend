@@ -53,8 +53,8 @@ func (userController UserController) RegisterUserController(mux *http.ServeMux) 
 	})
 
 	mux.HandleFunc(fmt.Sprintf("POST %s", userController.prefix), func(w http.ResponseWriter, r *http.Request) {
-		var reponseBody models.User
-		err := json.NewDecoder(r.Body).Decode(&reponseBody)
+		var responseBody models.User
+		err := json.NewDecoder(r.Body).Decode(&responseBody)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Header().Set("Content-Type", "application/json")
@@ -62,7 +62,7 @@ func (userController UserController) RegisterUserController(mux *http.ServeMux) 
 			return
 		}
 
-		user, err := userController.userService.CreateUser(reponseBody)
+		user, err := userController.userService.CreateUser(responseBody)
 		if err != nil {
 			switch e := err.(type) {
 			case models.Error:
@@ -79,6 +79,44 @@ func (userController UserController) RegisterUserController(mux *http.ServeMux) 
 
 		w.WriteHeader(http.StatusAccepted)
 		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(user)
+
+	})
+
+	mux.HandleFunc(fmt.Sprintf("PUT %s/{discordId}", userController.prefix), func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+
+		discordId, err := strconv.ParseInt(r.PathValue("discordId"), 10, 64)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(models.ErrorResponse{Message: err.Error()})
+			return
+		}
+
+		var responseBody models.User
+		err = json.NewDecoder(r.Body).Decode(&responseBody)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(models.ErrorResponse{Message: err.Error()})
+			return
+		}
+
+		user, err := userController.userService.UpsertUser(discordId, responseBody)
+		if err != nil {
+			switch e := err.(type) {
+			case models.Error:
+				w.WriteHeader(e.Status())
+			default:
+				w.WriteHeader(http.StatusInternalServerError)
+			}
+
+			json.NewEncoder(w).Encode(models.ErrorResponse{Message: err.Error()})
+			return
+
+		}
+
+		w.WriteHeader(http.StatusAccepted)
 		json.NewEncoder(w).Encode(user)
 
 	})
