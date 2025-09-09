@@ -44,3 +44,12 @@ func (userService UserService) UpsertUser(discordId int64, user models.User) (*m
 	}
 	return nil, err
 }
+
+func (userService UserService) DeleteUser(discordId int64) error {
+	_, err := userService.GetUserByDiscordId(discordId)
+	if err == nil {
+		return userService.userDAO.DeleteUser(discordId)
+	}
+
+	return err
+}

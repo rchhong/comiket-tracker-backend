@@ -81,3 +81,12 @@ func (userDAO *UserDAO) UpdateUser(discordId int64, updatedUser models.User) (*m
 	}
 	return &user, nil
 }
+
+func (userDAO UserDAO) DeleteUser(discordId int64) error {
+	_, err := userDAO.dbpool.Query(context.Background(), `
+		DELETE FROM users 
+		WHERE discord_id = $1
+	`, discordId)
+
+	return err
+}
