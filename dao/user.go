@@ -28,7 +28,7 @@ func (userDAO *UserDAO) CreateUser(user models.User) (*models.UserWithMetadata, 
 		VALUES
 			($1, $2, $3)
 		RETURNING *
-		`, user.Discord_Id, user.Discord_Name, user.Discord_Global_Name)
+		`, user.DiscordId, user.DiscordName, user.DiscordGlobalName)
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +71,7 @@ func (userDAO *UserDAO) UpdateUser(discordId int64, updatedUser models.User) (*m
 			updated_at = NOW()
 		WHERE discord_id = $3
 		RETURNING *
-	`, updatedUser.Discord_Name, updatedUser.Discord_Global_Name, discordId)
+	`, updatedUser.DiscordName, updatedUser.DiscordGlobalName, discordId)
 	if err != nil {
 		return nil, err
 	}

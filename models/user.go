@@ -6,17 +6,17 @@ import (
 )
 
 type User struct {
-	Discord_Id          int    `json:"discord_id"`
-	Discord_Name        string `json:"discord_name"`
-	Discord_Global_Name string `json:"discord_global_name"`
+	DiscordId         int    `json:"discord_id"`
+	DiscordName       string `json:"discord_name"`
+	DiscordGlobalName string `json:"discord_global_name"`
 }
 
 type UserWithMetadata struct {
 	User
-	Created_At time.Time `json:"created_at"`
-	Updated_at time.Time `json:"updated_at"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 func (user User) String() string {
-	return fmt.Sprintf("{Discord_Id: %d Discord_Name: %s Discord_Global_Name: %s}\n", user.Discord_Id, user.Discord_Name, user.Discord_Global_Name)
+	return fmt.Sprintf("{DiscordId: %d DiscordName: %s DiscordGlobalName: %s}\n", user.DiscordId, user.DiscordName, user.DiscordGlobalName)
 }
