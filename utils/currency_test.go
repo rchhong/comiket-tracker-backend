@@ -48,7 +48,7 @@ func TestCurrencyConverter(t *testing.T) {
 
 	defer server.Close()
 
-	testCurrencyConverter, err := NewCurrencyConverter(server.URL, testQueryParameters["api_key"], testQueryParameters["from"], testQueryParameters["to"])
+	testCurrencyConverter, err := NewCurrencyConverterImpl(server.URL, testQueryParameters["api_key"], testQueryParameters["from"], testQueryParameters["to"])
 	assert.Nil(err, "No errors should occur when trying to update the currency converter")
 	assert.Equal(0.5, testCurrencyConverter.conversionRate, "The currency rate should be the expected value")
 	expectedUpdatedAtTimestamp, err := time.Parse(time.DateOnly, "2025-09-27")
@@ -117,7 +117,7 @@ func TestCurrencyConverterWithUpdate(t *testing.T) {
 
 	defer server.Close()
 
-	testCurrencyConverter, err := NewCurrencyConverter(server.URL, testQueryParameters["api_key"], testQueryParameters["from"], testQueryParameters["to"])
+	testCurrencyConverter, err := NewCurrencyConverterImpl(server.URL, testQueryParameters["api_key"], testQueryParameters["from"], testQueryParameters["to"])
 	assert.Nil(err, "No errors should occur when trying to update the currency converter")
 	assert.Equal(0.5, testCurrencyConverter.conversionRate, "The currency rate should be the expected value")
 	expectedUpdatedAtTimestamp, err := time.Parse(time.DateOnly, "1970-01-01")

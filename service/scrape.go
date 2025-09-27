@@ -1,27 +1,20 @@
 package service
 
 import (
-	"fmt"
-
-	"github.com/gocolly/colly/v2"
 	"github.com/rchhong/comiket-backend/models"
+	"github.com/rchhong/comiket-backend/utils"
 )
 
-type MelonbooksScraper struct {
-	collector *colly.Collector
+type MelonbooksScraperService struct {
+	melonbooksScraper utils.MelonbooksScraper
 }
 
-func NewMelonbooksScraper() *MelonbooksScraper {
-	return &MelonbooksScraper{
-		collector: colly.NewCollector(),
+func NewMelonbooksScraperService(melonbooksScraper *utils.MelonbooksScraper) *MelonbooksScraperService {
+	return &MelonbooksScraperService{
+		melonbooksScraper: *melonbooksScraper,
 	}
 }
 
-func (melonbooksScraper *MelonbooksScraper) ScrapeMelonbooksProduct(melonbooksProductId int) models.Doujin {
-	var doujin models.Doujin
-
-	melonbooksUrl := fmt.Sprintf("https://www.melonbooks.co.jp/detail/detail.php?product_id=%d&adult_view=1", melonbooksProductId)
-	melonbooksScraper.collector.Visit(melonbooksUrl)
-
-	return doujin
+func (melonbooksScraperService *MelonbooksScraperService) ScrapeMelonbooksProduct(melonbooksId int) (*models.Doujin, error) {
+	return melonbooksScraperService.melonbooksScraper.ScrapeMelonbooksProduct(melonbooksId)
 }

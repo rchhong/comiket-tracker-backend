@@ -12,7 +12,11 @@ import (
 	"github.com/rchhong/comiket-backend/models"
 )
 
-type CurrencyConverter struct {
+type CurrencyConverter interface {
+	Convert(fromCurrencyAmount float64) float64
+}
+
+type CurrencyConverterImpl struct {
 	currencyAPIURL string
 	currencyAPIKey string
 	fromCurrency   string
@@ -21,8 +25,8 @@ type CurrencyConverter struct {
 	updatedAt      time.Time
 }
 
-func NewCurrencyConverter(currencyAPIURL string, currencyAPIKey string, fromCurrency string, toCurrency string) (*CurrencyConverter, error) {
-	currencyConverter := &CurrencyConverter{
+func NewCurrencyConverterImpl(currencyAPIURL string, currencyAPIKey string, fromCurrency string, toCurrency string) (*CurrencyConverterImpl, error) {
+	currencyConverter := &CurrencyConverterImpl{
 		currencyAPIURL: currencyAPIURL,
 		currencyAPIKey: currencyAPIKey,
 		toCurrency:     toCurrency,
@@ -39,7 +43,7 @@ func NewCurrencyConverter(currencyAPIURL string, currencyAPIKey string, fromCurr
 
 }
 
-func (currencyConverter *CurrencyConverter) Convert(fromCurrencyAmount float64) float64 {
+func (currencyConverter *CurrencyConverterImpl) Convert(fromCurrencyAmount float64) float64 {
 	// At this point, the currency rate should be populated
 	// Thus, we can just silently fail if we cannot update
 	if time.Since(currencyConverter.updatedAt).Hours() >= 24 {
@@ -53,7 +57,7 @@ func (currencyConverter *CurrencyConverter) Convert(fromCurrencyAmount float64) 
 	return fromCurrencyAmount * currencyConverter.conversionRate
 }
 
-func (currencyConverter *CurrencyConverter) updateConversionRate() error {
+func (currencyConverter *CurrencyConverterImpl) updateConversionRate() error {
 	url, err := url.Parse(currencyConverter.currencyAPIURL)
 	if err != nil {
 		return err
