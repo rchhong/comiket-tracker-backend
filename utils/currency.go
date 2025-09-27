@@ -39,7 +39,7 @@ func NewCurrencyConverter(currencyAPIURL string, currencyAPIKey string, fromCurr
 
 }
 
-func (currencyConverter CurrencyConverter) Convert(fromCurrencyAmount float64) float64 {
+func (currencyConverter *CurrencyConverter) Convert(fromCurrencyAmount float64) float64 {
 	// At this point, the currency rate should be populated
 	// Thus, we can just silently fail if we cannot update
 	if time.Since(currencyConverter.updatedAt).Hours() >= 24 {
@@ -86,6 +86,7 @@ func (currencyConverter *CurrencyConverter) updateConversionRate() error {
 	for _, v := range parsedResponse.Rates {
 		currencyConverter.conversionRate = v.Rate
 	}
+	currencyConverter.updatedAt = parsedResponse.UpdatedDate.Time
 
 	return nil
 
