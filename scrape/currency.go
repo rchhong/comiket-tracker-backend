@@ -1,8 +1,7 @@
-package utils
+package scrape
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -11,10 +10,6 @@ import (
 
 	"github.com/rchhong/comiket-backend/models"
 )
-
-type CurrencyConverter interface {
-	Convert(fromCurrencyAmount float64) float64
-}
 
 type CurrencyConverterImpl struct {
 	currencyAPIURL string
@@ -77,7 +72,7 @@ func (currencyConverter *CurrencyConverterImpl) updateConversionRate() error {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return errors.New(fmt.Sprintf("API returned with non-OK status %d", resp.StatusCode))
+		return fmt.Errorf("API returned with non-OK status %d", resp.StatusCode)
 	}
 
 	var parsedResponse models.CurrencyConverterAPIResponse

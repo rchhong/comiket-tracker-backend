@@ -7,6 +7,7 @@ Later on, this will be disabled.
 
 ## Set-up
 
+1. Create a currency conversion API key here: [https://currency.getgeoapi.com/](https://currency.getgeoapi.com/)
 1. Create `.env` with the following contains
 
 ```
@@ -14,6 +15,7 @@ POSTGRES_USER=<postgres_username>
 POSTGRES_PASSWORD=<postgres_password>
 POSTGRES_DB="comiket"
 PGDATA="/var/lib/postgresql/17/docker"
+CURRENCY_API+KEY=<currency_api_key>
 ```
 
 ```{bash}
@@ -33,6 +35,4 @@ docker compose down
 ## TODO
 
 2. Create config object that populates needed fields
-3. Create scarping service for scraping URLs (https://pkg.go.dev/github.com/gocolly/colly/v2)
-4. Create DAO + service layer for Users, Reservations, Doujins
-5. testing xdd
+3. testing xdd

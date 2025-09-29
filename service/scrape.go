@@ -2,14 +2,14 @@ package service
 
 import (
 	"github.com/rchhong/comiket-backend/models"
-	"github.com/rchhong/comiket-backend/utils"
+	"github.com/rchhong/comiket-backend/scrape"
 )
 
 type MelonbooksScraperService struct {
-	melonbooksScraper utils.MelonbooksScraper
+	melonbooksScraper scrape.MelonbooksScraper
 }
 
-func NewMelonbooksScraperService(melonbooksScraper *utils.MelonbooksScraper) *MelonbooksScraperService {
+func NewMelonbooksScraperService(melonbooksScraper *scrape.MelonbooksScraper) *MelonbooksScraperService {
 	return &MelonbooksScraperService{
 		melonbooksScraper: *melonbooksScraper,
 	}

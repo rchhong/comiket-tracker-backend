@@ -1,4 +1,4 @@
-package utils
+package scrape
 
 import (
 	"fmt"
@@ -14,10 +14,10 @@ import (
 
 type MelonbooksScraper struct {
 	collector         *colly.Collector
-	currencyConverter CurrencyConverter
+	currencyConverter models.CurrencyConverter
 }
 
-func NewMelonbooksScraper(currencyConverter CurrencyConverter) *MelonbooksScraper {
+func NewMelonbooksScraper(currencyConverter models.CurrencyConverter) *MelonbooksScraper {
 	return &MelonbooksScraper{
 		collector:         colly.NewCollector(),
 		currencyConverter: currencyConverter,
