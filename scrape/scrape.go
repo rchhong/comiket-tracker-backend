@@ -28,6 +28,8 @@ func (melonbooksScraper *MelonbooksScraper) ScrapeMelonbooksProduct(melonbooksPr
 	var doujin models.Doujin
 	var scrapeError error
 
+	melonbooksScraper.collector = colly.NewCollector()
+
 	melonbooksUrl := fmt.Sprintf("https://www.melonbooks.co.jp/detail/detail.php?product_id=%d&adult_view=1", melonbooksProductId)
 
 	doujin.MelonbooksId = melonbooksProductId

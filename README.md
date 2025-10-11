@@ -31,8 +31,3 @@ docker compose down
 # Design
 
 ![](./media/sql.png)
-
-## TODO
-
-2. Create config object that populates needed fields
-3. testing xdd

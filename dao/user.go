@@ -3,6 +3,7 @@ package dao
 import (
 	"context"
 	"errors"
+	"log"
 	"net/http"
 
 	"github.com/jackc/pgx/v5"
@@ -51,6 +52,8 @@ func (userDAO *UserDAO) GetUserByDiscordId(discordId int64) (*models.UserWithMet
 		return nil, err
 	}
 	user, err = pgx.CollectOneRow(row, pgx.RowToStructByName[models.UserWithMetadata])
+	// TODO: move this logic to service layer, not DAO layer
+	// nil, nil -> 404 error
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			log.Printf("[WARNING] user with discordId %d does not exist", discordId)

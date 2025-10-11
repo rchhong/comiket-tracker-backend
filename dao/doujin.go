@@ -86,6 +86,8 @@ func (doujinDAO *DoujinDAO) GetDoujinByMelonbooksId(melonbooksId int) (*models.D
 		return nil, err
 	}
 	doujin, err = pgx.CollectOneRow(row, pgx.RowToStructByName[models.DoujinWithMetadata])
+	// TODO: move this logic to service layer, not DAO layer
+	// nil, nil -> 404 error
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, models.StatusError{Err: err, StatusCode: http.StatusNotFound}
