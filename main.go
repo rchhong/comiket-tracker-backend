@@ -28,17 +28,24 @@ func main() {
 	melonbooksScraper := scrape.NewMelonbooksScraper(currencyConverter)
 	melonbooksScraperService := service.NewMelonbooksScraperService(melonbooksScraper)
 
-	userDAO := dao.NewUserDAO(postgresDB.Dbpool)
-	userService := service.NewUserService(userDAO)
-	userController := controllers.NewUserController(userService)
+	userDao := dao.NewUserDAO(postgresDB.Dbpool)
+	doujinDao := dao.NewDoujinDao(postgresDB.Dbpool)
+	reservationDao := dao.NewReservationDAO(postgresDB.Dbpool)
+
+	userService := service.NewUserService(userDao)
+	doujinService := service.NewDoujinService(doujinDao, melonbooksScraperService)
+	reservationService := service.NewReservationService(reservationDao, userService, doujinService)
+
+	userController := controllers.NewUserController(userService, reservationService)
+	doujinController := controllers.NewDoujinController(doujinService, reservationService)
 
 	userController.RegisterUserController(mux)
-
-	doujinDao := dao.NewDoujinDao(postgresDB.Dbpool)
-	doujinService := service.NewDoujinService(doujinDao, melonbooksScraperService)
-	doujinController := controllers.NewDoujinController(doujinService)
-
 	doujinController.RegisterDoujinController(mux)
+
+	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("HEALTHY"))
+	})
 
 	fmt.Printf("Listening on http://localhost:3000\n")
 	log.Fatal(http.ListenAndServe(":3000", mux))
