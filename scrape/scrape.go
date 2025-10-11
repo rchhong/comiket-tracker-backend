@@ -13,13 +13,11 @@ import (
 )
 
 type MelonbooksScraper struct {
-	collector         *colly.Collector
 	currencyConverter models.CurrencyConverter
 }
 
 func NewMelonbooksScraper(currencyConverter models.CurrencyConverter) *MelonbooksScraper {
 	return &MelonbooksScraper{
-		collector:         colly.NewCollector(),
 		currencyConverter: currencyConverter,
 	}
 }
@@ -28,19 +26,19 @@ func (melonbooksScraper *MelonbooksScraper) ScrapeMelonbooksProduct(melonbooksPr
 	var doujin models.Doujin
 	var scrapeError error
 
-	melonbooksScraper.collector = colly.NewCollector()
+	collector := colly.NewCollector()
 
 	melonbooksUrl := fmt.Sprintf("https://www.melonbooks.co.jp/detail/detail.php?product_id=%d&adult_view=1", melonbooksProductId)
 
 	doujin.MelonbooksId = melonbooksProductId
 	doujin.URL = melonbooksUrl
 	// Retrieve title
-	melonbooksScraper.collector.OnHTML("div.item-header > h1", func(e *colly.HTMLElement) {
+	collector.OnHTML("div.item-header > h1", func(e *colly.HTMLElement) {
 		doujin.Title = e.Text
 	})
 
 	// Retrieve cost in yen (+ convert to USD)
-	melonbooksScraper.collector.OnHTML("span.price--value", func(e *colly.HTMLElement) {
+	collector.OnHTML("span.price--value", func(e *colly.HTMLElement) {
 		parsedText := strings.TrimSpace(e.Text)
 		re := regexp.MustCompile(`[^\d]`)
 		parsedText = re.ReplaceAllString(parsedText, "")
@@ -57,14 +55,14 @@ func (melonbooksScraper *MelonbooksScraper) ScrapeMelonbooksProduct(melonbooksPr
 	// We only need to do this once or we will get the last image
 	// WARNING: Race conditions?
 	var once sync.Once
-	melonbooksScraper.collector.OnHTML("div.item-img img", func(e *colly.HTMLElement) {
+	collector.OnHTML("div.item-img img", func(e *colly.HTMLElement) {
 		once.Do(func() {
 			doujin.ImagePreviewURL = fmt.Sprintf("https:%s", e.Attr("src"))
 		})
 	})
 
 	// Retrieve all other metadata from table at bottom
-	melonbooksScraper.collector.OnHTML("div.table-wrapper > table > tbody", func(e *colly.HTMLElement) {
+	collector.OnHTML("div.table-wrapper > table > tbody", func(e *colly.HTMLElement) {
 		e.ForEach("tr", func(_ int, c *colly.HTMLElement) {
 			metadataItem := c.ChildText("th")
 
@@ -93,7 +91,7 @@ func (melonbooksScraper *MelonbooksScraper) ScrapeMelonbooksProduct(melonbooksPr
 		})
 	})
 
-	melonbooksScraper.collector.Visit(melonbooksUrl)
+	collector.Visit(melonbooksUrl)
 
 	if scrapeError != nil {
 		return nil, scrapeError
