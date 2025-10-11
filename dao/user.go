@@ -20,7 +20,7 @@ func NewUserDAO(dbpool *pgxpool.Pool) *UserDAO {
 	}
 }
 
-func (userDAO *UserDAO) CreateUser(user models.User) (*models.UserWithMetadata, error) {
+func (userDAO *UserDAO) CreateUser(discordId int64, user models.User) (*models.UserWithMetadata, error) {
 	var newUserWithMetadata models.UserWithMetadata
 	row, err := userDAO.dbpool.Query(context.Background(), `
 		INSERT INTO users 
@@ -28,7 +28,7 @@ func (userDAO *UserDAO) CreateUser(user models.User) (*models.UserWithMetadata, 
 		VALUES
 			($1, $2, $3)
 		RETURNING *
-		`, user.DiscordId, user.DiscordName, user.DiscordGlobalName)
+		`, discordId, user.DiscordName, user.DiscordGlobalName)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +45,7 @@ func (userDAO *UserDAO) GetUserByDiscordId(discordId int64) (*models.UserWithMet
 	var user models.UserWithMetadata
 
 	row, err := userDAO.dbpool.Query(context.Background(), `
-		SELECT * FROM users WHERE discord_id = $1
+		SELECT * FROM users WHERE discord_id = $1 LIMIT 1
 	`, discordId)
 	if err != nil {
 		return nil, err
@@ -53,6 +53,7 @@ func (userDAO *UserDAO) GetUserByDiscordId(discordId int64) (*models.UserWithMet
 	user, err = pgx.CollectOneRow(row, pgx.RowToStructByName[models.UserWithMetadata])
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
+			log.Printf("[WARNING] user with discordId %d does not exist", discordId)
 			return nil, models.StatusError{Err: err, StatusCode: http.StatusNotFound}
 		}
 		return nil, err
