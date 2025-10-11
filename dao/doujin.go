@@ -107,8 +107,8 @@ func (doujinDAO *DoujinDAO) UpdateDoujin(melonbooksId int, updatedDoujin models.
 				is_r18 = $5,
 				image_preview_url = $6,
 				url = $7,
-				circle_name = $8,
-				author_names = $9,
+				circle = $8,
+				author = $9,
 				genres = $10,
 				events = $11,
 				updated_at = NOW()
