@@ -108,23 +108,23 @@ func (doujinDAO *DoujinDAO) UpdateDoujin(melonbooksId int, updatedDoujin models.
 				image_preview_url = $6,
 				url = $7,
 				circle = $8,
-				author = $9,
+				authors = $9,
 				genres = $10,
 				events = $11,
 				updated_at = NOW()
 		where melonbooks_id = $1 
 		RETURNING *
-		`, doujin.MelonbooksId,
-		doujin.Title,
-		doujin.PriceInUsd,
-		doujin.PriceInYen,
-		doujin.IsR18,
-		doujin.ImagePreviewURL,
-		doujin.URL,
-		doujin.Circle,
-		doujin.Authors,
-		doujin.Genres,
-		doujin.Events,
+		`, melonbooksId,
+		updatedDoujin.Title,
+		updatedDoujin.PriceInUsd,
+		updatedDoujin.PriceInYen,
+		updatedDoujin.IsR18,
+		updatedDoujin.ImagePreviewURL,
+		updatedDoujin.URL,
+		updatedDoujin.Circle,
+		updatedDoujin.Authors,
+		updatedDoujin.Genres,
+		updatedDoujin.Events,
 	)
 	if err != nil {
 		return nil, err
