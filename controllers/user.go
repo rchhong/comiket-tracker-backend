@@ -50,7 +50,9 @@ func (userController UserController) RegisterUserController(mux *http.ServeMux) 
 		}
 
 		w.WriteHeader(http.StatusCreated)
-		json.NewEncoder(w).Encode(user)
+		jsonEncoder := json.NewEncoder(w)
+		jsonEncoder.SetEscapeHTML(false)
+		jsonEncoder.Encode(user)
 
 	})
 
@@ -88,7 +90,9 @@ func (userController UserController) RegisterUserController(mux *http.ServeMux) 
 		}
 
 		w.WriteHeader(http.StatusAccepted)
-		json.NewEncoder(w).Encode(user)
+		jsonEncoder := json.NewEncoder(w)
+		jsonEncoder.SetEscapeHTML(false)
+		jsonEncoder.Encode(user)
 
 	})
 
@@ -116,7 +120,9 @@ func (userController UserController) RegisterUserController(mux *http.ServeMux) 
 		}
 
 		w.WriteHeader(http.StatusCreated)
-		json.NewEncoder(w).Encode(reservations)
+		jsonEncoder := json.NewEncoder(w)
+		jsonEncoder.SetEscapeHTML(false)
+		jsonEncoder.Encode(reservations)
 
 	})
 

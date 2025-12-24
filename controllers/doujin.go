@@ -50,7 +50,9 @@ func (doujinController DoujinController) RegisterDoujinController(mux *http.Serv
 		}
 
 		w.WriteHeader(http.StatusCreated)
-		json.NewEncoder(w).Encode(doujin)
+		jsonEncoder := json.NewEncoder(w)
+		jsonEncoder.SetEscapeHTML(false)
+		jsonEncoder.Encode(doujin)
 
 	})
 
@@ -79,7 +81,9 @@ func (doujinController DoujinController) RegisterDoujinController(mux *http.Serv
 		}
 
 		w.WriteHeader(http.StatusAccepted)
-		json.NewEncoder(w).Encode(doujin)
+		jsonEncoder := json.NewEncoder(w)
+		jsonEncoder.SetEscapeHTML(false)
+		jsonEncoder.Encode(doujin)
 
 	})
 
@@ -123,7 +127,9 @@ func (doujinController DoujinController) RegisterDoujinController(mux *http.Serv
 		}
 
 		w.WriteHeader(http.StatusAccepted)
-		json.NewEncoder(w).Encode(reservation)
+		jsonEncoder := json.NewEncoder(w)
+		jsonEncoder.SetEscapeHTML(false)
+		jsonEncoder.Encode(reservation)
 
 	})
 
