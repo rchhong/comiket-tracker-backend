@@ -54,8 +54,8 @@ func (doujinDAO *DoujinDAO) CreateDoujin(doujin models.Doujin) (*models.DoujinWi
 		RETURNING *
 		`, doujin.MelonbooksId,
 		doujin.Title,
-		doujin.PriceInUsd,
 		doujin.PriceInYen,
+		doujin.PriceInUsd,
 		doujin.IsR18,
 		doujin.ImagePreviewURL,
 		doujin.URL,
@@ -120,8 +120,8 @@ func (doujinDAO *DoujinDAO) UpdateDoujin(melonbooksId int, updatedDoujin models.
 		RETURNING *
 		`, melonbooksId,
 		updatedDoujin.Title,
-		updatedDoujin.PriceInUsd,
 		updatedDoujin.PriceInYen,
+		updatedDoujin.PriceInUsd,
 		updatedDoujin.IsR18,
 		updatedDoujin.ImagePreviewURL,
 		updatedDoujin.URL,
