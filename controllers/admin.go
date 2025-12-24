@@ -39,7 +39,6 @@ func (adminController AdminController) RegisterAdminController(mux *http.ServeMu
 			return
 		}
 
-		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Content-Type", "text/csv")
 		w.Header().Set("Transfer-Encoding", "chunked")
 		w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=export_%d.csv", time.Now().Unix()))
