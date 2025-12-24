@@ -35,12 +35,15 @@ func main() {
 	userService := service.NewUserService(userDao)
 	doujinService := service.NewDoujinService(doujinDao, melonbooksScraperService)
 	reservationService := service.NewReservationService(reservationDao, userService, doujinService)
+	adminService := service.NewAdminService(reservationDao)
 
 	userController := controllers.NewUserController(userService, reservationService)
 	doujinController := controllers.NewDoujinController(doujinService, reservationService)
+	adminController := controllers.NewAdminController(adminService)
 
 	userController.RegisterUserController(mux)
 	doujinController.RegisterDoujinController(mux)
+	adminController.RegisterAdminController(mux)
 
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)

@@ -81,6 +81,7 @@ func (reservationDAO ReservationDAO) DeleteReservation(melonbooksId int, discord
 	return err
 }
 
+// TODO: Create function to get all reservations for doujin
 func (reservationDAO ReservationDAO) GetAllReservationsForUser(discordId int64) ([]models.DoujinWithMetadata, error) {
 	var reservations []models.DoujinWithMetadata
 
@@ -99,4 +100,34 @@ func (reservationDAO ReservationDAO) GetAllReservationsForUser(discordId int64) 
 		return nil, err
 	}
 	return reservations, nil
+}
+
+func (reservationDAO ReservationDAO) GetRawExportData() ([]models.ExportRow, error) {
+	var exportRows []models.ExportRow
+
+	rows, err := reservationDAO.dbpool.Query(context.Background(), `
+		SELECT 
+			r.melonbooks_id, 
+			r.discord_id, 
+			d.url,
+			d.title,
+			d.price_in_yen,
+			d.price_in_usd,
+			u.discord_name 
+		FROM (reservations r 
+			  LEFT JOIN doujins d on r.melonbooks_id = d.melonbooks_id 
+			  LEFT JOIN users u ON u.discord_id = r.discord_id
+		)
+		ORDER BY r.discord_id, r.melonbooks_id;
+	`)
+
+	if err != nil {
+		return nil, err
+	}
+	exportRows, err = pgx.CollectRows(rows, pgx.RowToStructByName[models.ExportRow])
+
+	if err != nil {
+		return nil, err
+	}
+	return exportRows, nil
 }

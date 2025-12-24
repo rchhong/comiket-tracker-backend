@@ -76,6 +76,8 @@ func (doujinDAO *DoujinDAO) CreateDoujin(doujin models.Doujin) (*models.DoujinWi
 	return &newDoujinWithMetadata, nil
 }
 
+// TODO: Create method to retrieve all doujins
+
 func (doujinDAO *DoujinDAO) GetDoujinByMelonbooksId(melonbooksId int) (*models.DoujinWithMetadata, error) {
 	var doujin models.DoujinWithMetadata
 

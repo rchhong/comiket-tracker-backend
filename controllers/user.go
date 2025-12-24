@@ -92,6 +92,7 @@ func (userController UserController) RegisterUserController(mux *http.ServeMux) 
 
 	})
 
+	// TODO: all reservation items should be moved
 	mux.HandleFunc(fmt.Sprintf("GET %s/{discordId}/reservations", userController.prefix), func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
