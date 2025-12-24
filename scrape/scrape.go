@@ -6,7 +6,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"sync"
 
 	"github.com/gocolly/colly/v2"
 	"github.com/rchhong/comiket-backend/models"
@@ -52,13 +51,8 @@ func (melonbooksScraper *MelonbooksScraper) ScrapeMelonbooksProduct(melonbooksPr
 	})
 
 	// Retrieve image preview URL
-	// We only need to do this once or we will get the last image
-	// WARNING: Race conditions?
-	var once sync.Once
-	collector.OnHTML("div.item-img img", func(e *colly.HTMLElement) {
-		once.Do(func() {
-			doujin.ImagePreviewURL = fmt.Sprintf("https:%s", e.Attr("src"))
-		})
+	collector.OnHTML("div.item-img", func(e *colly.HTMLElement) {
+		doujin.ImagePreviewURL = fmt.Sprintf("https:%s", e.ChildAttr("img", "src"))
 	})
 
 	// Retrieve all other metadata from table at bottom
