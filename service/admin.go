@@ -43,10 +43,6 @@ func (adminService AdminService) GenerateExport() ([][]string, error) {
 	}
 	sortedUsers := slices.Sorted(maps.Keys(users))
 
-	for _, header := range headers {
-		println(header)
-	}
-
 	headers = slices.Concat(headers, sortedUsers)
 	outputRows := make(map[int]map[string]string)
 	for _, row := range rawRows {
