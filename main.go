@@ -7,11 +7,11 @@ import (
 	"os"
 
 	"github.com/rchhong/comiket-backend/controllers"
+	"github.com/rchhong/comiket-backend/currency/ipgeoapi"
 	"github.com/rchhong/comiket-backend/db"
 	"github.com/rchhong/comiket-backend/repositories/postgres"
 	"github.com/rchhong/comiket-backend/scrape"
 	"github.com/rchhong/comiket-backend/service"
-	"github.com/rchhong/comiket-backend/utils"
 )
 
 func main() {
@@ -20,7 +20,7 @@ func main() {
 	postgresDB := db.InitializeDB()
 	defer postgresDB.Teardown()
 
-	currencyConverter, err := scrape.NewCurrencyConverterImpl(utils.CURRENCY_API_URL, os.Getenv("CURRENCY_API_KEY"), "JPY", "USD")
+	currencyConverter, err := ipgeoapi.NewCurrencyConverterIpGeoAPI(ipgeoapi.IPGEO_API_CURRENCY_API_URL, os.Getenv("CURRENCY_API_KEY"), "JPY", "USD")
 	if err != nil {
 		log.Fatalf("[ERROR] unable to retrieve currency conversion rate: %v", err)
 	}

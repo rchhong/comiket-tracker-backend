@@ -8,14 +8,15 @@ import (
 	"strings"
 
 	"github.com/gocolly/colly/v2"
+	"github.com/rchhong/comiket-backend/currency"
 	"github.com/rchhong/comiket-backend/models"
 )
 
 type MelonbooksScraper struct {
-	currencyConverter models.CurrencyConverter
+	currencyConverter currency.CurrencyConverter
 }
 
-func NewMelonbooksScraper(currencyConverter models.CurrencyConverter) *MelonbooksScraper {
+func NewMelonbooksScraper(currencyConverter currency.CurrencyConverter) *MelonbooksScraper {
 	return &MelonbooksScraper{
 		currencyConverter: currencyConverter,
 	}

@@ -1,4 +1,4 @@
-package models
+package dto
 
 import (
 	"strings"
@@ -34,8 +34,4 @@ func (currencyConverterTime *CurrencyConverterTime) UnmarshalJSON(b []byte) erro
 
 	currencyConverterTime.Time = convertedTime
 	return nil
-}
-
-type CurrencyConverter interface {
-	Convert(fromCurrencyAmount float64) float64
 }

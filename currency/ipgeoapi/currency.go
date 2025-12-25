@@ -1,4 +1,4 @@
-package scrape
+package ipgeoapi
 
 import (
 	"encoding/json"
@@ -8,10 +8,10 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/rchhong/comiket-backend/models"
+	"github.com/rchhong/comiket-backend/currency/ipgeoapi/dto"
 )
 
-type CurrencyConverterImpl struct {
+type CurrencyConverterIpGeoAPI struct {
 	currencyAPIURL string
 	currencyAPIKey string
 	fromCurrency   string
@@ -20,8 +20,10 @@ type CurrencyConverterImpl struct {
 	updatedAt      time.Time
 }
 
-func NewCurrencyConverterImpl(currencyAPIURL string, currencyAPIKey string, fromCurrency string, toCurrency string) (*CurrencyConverterImpl, error) {
-	currencyConverter := &CurrencyConverterImpl{
+var IPGEO_API_CURRENCY_API_URL string = "https://api.getgeoapi.com/v2/currency/convert"
+
+func NewCurrencyConverterIpGeoAPI(currencyAPIURL string, currencyAPIKey string, fromCurrency string, toCurrency string) (*CurrencyConverterIpGeoAPI, error) {
+	currencyConverter := &CurrencyConverterIpGeoAPI{
 		currencyAPIURL: currencyAPIURL,
 		currencyAPIKey: currencyAPIKey,
 		toCurrency:     toCurrency,
@@ -38,7 +40,7 @@ func NewCurrencyConverterImpl(currencyAPIURL string, currencyAPIKey string, from
 
 }
 
-func (currencyConverter *CurrencyConverterImpl) Convert(fromCurrencyAmount float64) float64 {
+func (currencyConverter *CurrencyConverterIpGeoAPI) Convert(fromCurrencyAmount float64) float64 {
 	// At this point, the currency rate should be populated
 	// Thus, we can just silently fail if we cannot update
 	if time.Since(currencyConverter.updatedAt).Hours() >= 24 {
@@ -52,7 +54,7 @@ func (currencyConverter *CurrencyConverterImpl) Convert(fromCurrencyAmount float
 	return fromCurrencyAmount * currencyConverter.conversionRate
 }
 
-func (currencyConverter *CurrencyConverterImpl) updateConversionRate() error {
+func (currencyConverter *CurrencyConverterIpGeoAPI) updateConversionRate() error {
 	url, err := url.Parse(currencyConverter.currencyAPIURL)
 	if err != nil {
 		return err
@@ -75,7 +77,7 @@ func (currencyConverter *CurrencyConverterImpl) updateConversionRate() error {
 		return fmt.Errorf("API returned with non-OK status %d", resp.StatusCode)
 	}
 
-	var parsedResponse models.CurrencyConverterAPIResponse
+	var parsedResponse dto.CurrencyConverterAPIResponse
 	err = json.NewDecoder(resp.Body).Decode(&parsedResponse)
 	if err != nil {
 		return err
