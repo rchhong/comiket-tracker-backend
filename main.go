@@ -38,12 +38,14 @@ func main() {
 	reservationService := service.NewReservationService(reservationRepository, userService, doujinService)
 	exportService := service.NewExportService(exportRepository)
 
-	userController := controllers.NewUserController(userService, reservationService)
-	doujinController := controllers.NewDoujinController(doujinService, reservationService)
+	userController := controllers.NewUserController(userService)
+	doujinController := controllers.NewDoujinController(doujinService)
+	reservationController := controllers.NewReservationController(reservationService)
 	exportController := controllers.NewExportController(exportService)
 
 	userController.RegisterUserController(mux)
 	doujinController.RegisterDoujinController(mux)
+	reservationController.RegisterReservationController(mux)
 	exportController.RegisterExportController(mux)
 
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {

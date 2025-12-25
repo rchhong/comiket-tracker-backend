@@ -11,16 +11,14 @@ import (
 )
 
 type UserController struct {
-	userService        *service.UserService
-	reservationService *service.ReservationService
-	prefix             string
+	userService *service.UserService
+	prefix      string
 }
 
-func NewUserController(userService *service.UserService, reservationService *service.ReservationService) *UserController {
+func NewUserController(userService *service.UserService) *UserController {
 	return &UserController{
-		userService:        userService,
-		reservationService: reservationService,
-		prefix:             "/users",
+		userService: userService,
+		prefix:      "/users",
 	}
 }
 
@@ -94,70 +92,6 @@ func (userController UserController) RegisterUserController(mux *http.ServeMux) 
 		jsonEncoder.SetEscapeHTML(false)
 		jsonEncoder.Encode(user)
 
-	})
-
-	// TODO: all reservation items should be moved
-	mux.HandleFunc(fmt.Sprintf("GET %s/{discordId}/reservations", userController.prefix), func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-
-		discordId, err := strconv.ParseInt(r.PathValue("discordId"), 10, 64)
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(models.ErrorResponse{Message: err.Error()})
-			return
-		}
-
-		reservations, err := userController.reservationService.GetAllReservationsForUser(discordId)
-		if err != nil {
-			switch e := err.(type) {
-			case models.Error:
-				w.WriteHeader(e.Status())
-			default:
-				w.WriteHeader(http.StatusInternalServerError)
-			}
-			json.NewEncoder(w).Encode(models.ErrorResponse{Message: err.Error()})
-			return
-		}
-
-		w.WriteHeader(http.StatusCreated)
-		jsonEncoder := json.NewEncoder(w)
-		jsonEncoder.SetEscapeHTML(false)
-		jsonEncoder.Encode(reservations)
-
-	})
-
-	mux.HandleFunc(fmt.Sprintf("DELETE %s/{discordId}/reservations/{melonbooksId}", userController.prefix), func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-
-		discordId, err := strconv.ParseInt(r.PathValue("discordId"), 10, 64)
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(models.ErrorResponse{Message: err.Error()})
-			return
-		}
-
-		melonbooksId, err := strconv.ParseInt(r.PathValue("melonbooksId"), 10, 64)
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(models.ErrorResponse{Message: err.Error()})
-			return
-		}
-
-		err = userController.reservationService.DeleteReservation(int(melonbooksId), discordId)
-		if err != nil {
-			switch e := err.(type) {
-			case models.Error:
-				w.WriteHeader(e.Status())
-			default:
-				w.WriteHeader(http.StatusInternalServerError)
-			}
-
-			json.NewEncoder(w).Encode(models.ErrorResponse{Message: err.Error()})
-			return
-
-		}
-
-		w.WriteHeader(http.StatusAccepted)
 	})
 
 }
