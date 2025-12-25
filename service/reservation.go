@@ -5,21 +5,21 @@ import (
 	"net/http"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/rchhong/comiket-backend/repositories"
 	"github.com/rchhong/comiket-backend/models"
+	"github.com/rchhong/comiket-backend/repositories"
 )
 
 type ReservationService struct {
-	reservationRepository *repositories.ReservationRepository
-	userService    *UserService
-	doujinService  *DoujinService
+	reservationRepository repositories.ReservationRepository
+	userService           *UserService
+	doujinService         *DoujinService
 }
 
-func NewReservationService(reservationRepository *repositories.ReservationRepository, userService *UserService, doujinService *DoujinService) *ReservationService {
+func NewReservationService(reservationRepository repositories.ReservationRepository, userService *UserService, doujinService *DoujinService) *ReservationService {
 	return &ReservationService{
 		reservationRepository: reservationRepository,
-		userService:    userService,
-		doujinService:  doujinService,
+		userService:           userService,
+		doujinService:         doujinService,
 	}
 }
 

@@ -8,7 +8,7 @@ import (
 
 	"github.com/rchhong/comiket-backend/controllers"
 	"github.com/rchhong/comiket-backend/db"
-	"github.com/rchhong/comiket-backend/repositories"
+	"github.com/rchhong/comiket-backend/repositories/postgres"
 	"github.com/rchhong/comiket-backend/scrape"
 	"github.com/rchhong/comiket-backend/service"
 	"github.com/rchhong/comiket-backend/utils"
@@ -28,22 +28,23 @@ func main() {
 	melonbooksScraper := scrape.NewMelonbooksScraper(currencyConverter)
 	melonbooksScraperService := service.NewMelonbooksScraperService(melonbooksScraper)
 
-	userRepository := repositories.NewUserRepository(postgresDB.Dbpool)
-	doujinRepository := repositories.NewDoujinRepository(postgresDB.Dbpool)
-	reservationRepository := repositories.NewReservationRepository(postgresDB.Dbpool)
+	userRepository := postgres.NewUserRepositoryPostgres(postgresDB.Dbpool)
+	doujinRepository := postgres.NewDoujinRepositoryPostgres(postgresDB.Dbpool)
+	reservationRepository := postgres.NewReservationRepositoryPostgres(postgresDB.Dbpool)
+	exportRepository := postgres.NewExportRepositoryPostgres(postgresDB.Dbpool)
 
 	userService := service.NewUserService(userRepository)
 	doujinService := service.NewDoujinService(doujinRepository, melonbooksScraperService)
 	reservationService := service.NewReservationService(reservationRepository, userService, doujinService)
-	adminService := service.NewAdminService(reservationRepository)
+	exportService := service.NewExportService(exportRepository)
 
 	userController := controllers.NewUserController(userService, reservationService)
 	doujinController := controllers.NewDoujinController(doujinService, reservationService)
-	adminController := controllers.NewAdminController(adminService)
+	exportController := controllers.NewExportController(exportService)
 
 	userController.RegisterUserController(mux)
 	doujinController.RegisterDoujinController(mux)
-	adminController.RegisterAdminController(mux)
+	exportController.RegisterExportController(mux)
 
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)

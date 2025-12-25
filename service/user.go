@@ -4,15 +4,15 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/rchhong/comiket-backend/repositories"
 	"github.com/rchhong/comiket-backend/models"
+	"github.com/rchhong/comiket-backend/repositories"
 )
 
 type UserService struct {
-	userRepository *repositories.UserRepository
+	userRepository repositories.UserRepository
 }
 
-func NewUserService(userRepository *repositories.UserRepository) *UserService {
+func NewUserService(userRepository repositories.UserRepository) *UserService {
 	return &UserService{
 		userRepository: userRepository,
 	}

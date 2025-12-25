@@ -6,22 +6,22 @@ import (
 	"slices"
 	"strconv"
 
-	"github.com/rchhong/comiket-backend/repositories"
 	"github.com/rchhong/comiket-backend/models"
+	"github.com/rchhong/comiket-backend/repositories"
 )
 
-type AdminService struct {
-	reservationRepository *repositories.ReservationRepository
+type ExportService struct {
+	exportRepository repositories.ExportRepository
 }
 
-func NewAdminService(reservationRepository *repositories.ReservationRepository) *AdminService {
-	return &AdminService{
-		reservationRepository: reservationRepository,
+func NewExportService(exportRepository repositories.ExportRepository) *ExportService {
+	return &ExportService{
+		exportRepository: exportRepository,
 	}
 }
 
-func (adminService AdminService) GenerateExport() ([][]string, error) {
-	rawRows, err := adminService.reservationRepository.GetRawExportData()
+func (exportService ExportService) GenerateExport() ([][]string, error) {
+	rawRows, err := exportService.exportRepository.GetRawExportData()
 	if err != nil {
 		return nil, models.StatusError{Err: err, StatusCode: http.StatusInternalServerError}
 	}

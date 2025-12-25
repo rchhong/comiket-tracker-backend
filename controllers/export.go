@@ -12,21 +12,21 @@ import (
 	"github.com/rchhong/comiket-backend/models"
 )
 
-type AdminController struct {
-	adminService *service.AdminService
-	prefix       string
+type ExportController struct {
+	exportService *service.ExportService
+	prefix        string
 }
 
-func NewAdminController(adminService *service.AdminService) *AdminController {
-	return &AdminController{
-		adminService: adminService,
-		prefix:       "/admin",
+func NewExportController(exportService *service.ExportService) *ExportController {
+	return &ExportController{
+		exportService: exportService,
+		prefix:        "/admin",
 	}
 }
 
-func (adminController AdminController) RegisterAdminController(mux *http.ServeMux) {
-	mux.HandleFunc(fmt.Sprintf("%s/export", adminController.prefix), func(w http.ResponseWriter, r *http.Request) {
-		export, err := adminController.adminService.GenerateExport()
+func (exportController ExportController) RegisterExportController(mux *http.ServeMux) {
+	mux.HandleFunc(fmt.Sprintf("%s/export", exportController.prefix), func(w http.ResponseWriter, r *http.Request) {
+		export, err := exportController.exportService.GenerateExport()
 		if err != nil {
 			switch e := err.(type) {
 			case models.Error:

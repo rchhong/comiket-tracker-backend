@@ -8,17 +8,17 @@ import (
 	"github.com/rchhong/comiket-backend/models"
 )
 
-type ReservationRepository struct {
+type ReservationRepositoryPostgres struct {
 	dbpool *pgxpool.Pool
 }
 
-func NewReservationRepository(dbpool *pgxpool.Pool) *ReservationRepository {
-	return &ReservationRepository{
+func NewReservationRepositoryPostgres(dbpool *pgxpool.Pool) *ReservationRepositoryPostgres {
+	return &ReservationRepositoryPostgres{
 		dbpool: dbpool,
 	}
 }
 
-func (reservationRepository *ReservationRepository) CreateReservation(melonbooksId int, discordId int64) (*models.ReservationWithMetadata, error) {
+func (reservationRepository *ReservationRepositoryPostgres) CreateReservation(melonbooksId int, discordId int64) (*models.ReservationWithMetadata, error) {
 	var newReservation models.ReservationWithMetadata
 	row, err := reservationRepository.dbpool.Query(context.Background(), `
 		INSERT INTO reservations 
@@ -39,7 +39,7 @@ func (reservationRepository *ReservationRepository) CreateReservation(melonbooks
 	return &newReservation, nil
 }
 
-func (reservationRepository *ReservationRepository) GetReservationByReservationId(reservationId int64) (*models.ReservationWithMetadata, error) {
+func (reservationRepository *ReservationRepositoryPostgres) GetReservationByReservationId(reservationId int64) (*models.ReservationWithMetadata, error) {
 	var reservation models.ReservationWithMetadata
 
 	row, err := reservationRepository.dbpool.Query(context.Background(), `
@@ -55,7 +55,7 @@ func (reservationRepository *ReservationRepository) GetReservationByReservationI
 	return &reservation, nil
 }
 
-func (reservationRepository *ReservationRepository) GetReservationByMelonbooksIdDiscordId(melonbooksId int, discordId int64) (*models.ReservationWithMetadata, error) {
+func (reservationRepository *ReservationRepositoryPostgres) GetReservationByMelonbooksIdDiscordId(melonbooksId int, discordId int64) (*models.ReservationWithMetadata, error) {
 	var reservation models.ReservationWithMetadata
 
 	row, err := reservationRepository.dbpool.Query(context.Background(), `
@@ -71,7 +71,7 @@ func (reservationRepository *ReservationRepository) GetReservationByMelonbooksId
 	return &reservation, nil
 }
 
-func (reservationRepository ReservationRepository) DeleteReservation(melonbooksId int, discordId int64) error {
+func (reservationRepository ReservationRepositoryPostgres) DeleteReservation(melonbooksId int, discordId int64) error {
 	// TODO: should this be a no-op if the resource doesn't exist
 	_, err := reservationRepository.dbpool.Query(context.Background(), `
 		DELETE FROM reservations 
@@ -82,7 +82,7 @@ func (reservationRepository ReservationRepository) DeleteReservation(melonbooksI
 }
 
 // TODO: Create function to get all reservations for doujin
-func (reservationRepository ReservationRepository) GetAllReservationsForUser(discordId int64) ([]models.DoujinWithMetadata, error) {
+func (reservationRepository ReservationRepositoryPostgres) GetAllReservationsForUser(discordId int64) ([]models.DoujinWithMetadata, error) {
 	var reservations []models.DoujinWithMetadata
 
 	rows, err := reservationRepository.dbpool.Query(context.Background(), `
@@ -100,34 +100,4 @@ func (reservationRepository ReservationRepository) GetAllReservationsForUser(dis
 		return nil, err
 	}
 	return reservations, nil
-}
-
-func (reservationRepository ReservationRepository) GetRawExportData() ([]models.ExportRow, error) {
-	var exportRows []models.ExportRow
-
-	rows, err := reservationRepository.dbpool.Query(context.Background(), `
-		SELECT 
-			r.melonbooks_id, 
-			r.discord_id, 
-			d.url,
-			d.title,
-			d.price_in_yen,
-			d.price_in_usd,
-			u.discord_name 
-		FROM (reservations r 
-			  LEFT JOIN doujins d on r.melonbooks_id = d.melonbooks_id 
-			  LEFT JOIN users u ON u.discord_id = r.discord_id
-		)
-		ORDER BY r.discord_id, r.melonbooks_id;
-	`)
-
-	if err != nil {
-		return nil, err
-	}
-	exportRows, err = pgx.CollectRows(rows, pgx.RowToStructByName[models.ExportRow])
-
-	if err != nil {
-		return nil, err
-	}
-	return exportRows, nil
 }

@@ -4,18 +4,18 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/rchhong/comiket-backend/repositories"
 	"github.com/rchhong/comiket-backend/models"
+	"github.com/rchhong/comiket-backend/repositories"
 )
 
 type DoujinService struct {
-	doujinRepository                *repositories.DoujinRepository
+	doujinRepository         repositories.DoujinRepository
 	melonbooksScraperService *MelonbooksScraperService
 }
 
-func NewDoujinService(doujinRepository *repositories.DoujinRepository, melonbooksScraperService *MelonbooksScraperService) *DoujinService {
+func NewDoujinService(doujinRepository repositories.DoujinRepository, melonbooksScraperService *MelonbooksScraperService) *DoujinService {
 	return &DoujinService{
-		doujinRepository:                doujinRepository,
+		doujinRepository:         doujinRepository,
 		melonbooksScraperService: melonbooksScraperService,
 	}
 }

@@ -11,17 +11,17 @@ import (
 	"github.com/rchhong/comiket-backend/models"
 )
 
-type UserRepository struct {
+type UserRepositoryPostgres struct {
 	dbpool *pgxpool.Pool
 }
 
-func NewUserRepository(dbpool *pgxpool.Pool) *UserRepository {
-	return &UserRepository{
+func NewUserRepositoryPostgres(dbpool *pgxpool.Pool) *UserRepositoryPostgres {
+	return &UserRepositoryPostgres{
 		dbpool: dbpool,
 	}
 }
 
-func (userRepository *UserRepository) CreateUser(discordId int64, user models.User) (*models.UserWithMetadata, error) {
+func (userRepository *UserRepositoryPostgres) CreateUser(discordId int64, user models.User) (*models.UserWithMetadata, error) {
 	var newUserWithMetadata models.UserWithMetadata
 	row, err := userRepository.dbpool.Query(context.Background(), `
 		INSERT INTO users 
@@ -42,7 +42,7 @@ func (userRepository *UserRepository) CreateUser(discordId int64, user models.Us
 	return &newUserWithMetadata, nil
 }
 
-func (userRepository *UserRepository) GetUserByDiscordId(discordId int64) (*models.UserWithMetadata, error) {
+func (userRepository *UserRepositoryPostgres) GetUserByDiscordId(discordId int64) (*models.UserWithMetadata, error) {
 	var user models.UserWithMetadata
 
 	row, err := userRepository.dbpool.Query(context.Background(), `
@@ -64,7 +64,7 @@ func (userRepository *UserRepository) GetUserByDiscordId(discordId int64) (*mode
 	return &user, nil
 }
 
-func (userRepository *UserRepository) UpdateUser(discordId int64, updatedUser models.User) (*models.UserWithMetadata, error) {
+func (userRepository *UserRepositoryPostgres) UpdateUser(discordId int64, updatedUser models.User) (*models.UserWithMetadata, error) {
 	var user models.UserWithMetadata
 
 	row, err := userRepository.dbpool.Query(context.Background(), `
@@ -86,7 +86,7 @@ func (userRepository *UserRepository) UpdateUser(discordId int64, updatedUser mo
 	return &user, nil
 }
 
-func (userRepository UserRepository) DeleteUser(discordId int64) error {
+func (userRepository UserRepositoryPostgres) DeleteUser(discordId int64) error {
 	_, err := userRepository.dbpool.Query(context.Background(), `
 		DELETE FROM users 
 		WHERE discord_id = $1
