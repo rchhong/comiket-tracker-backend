@@ -3,21 +3,20 @@ package models
 import (
 	"fmt"
 	"time"
-
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type DoujinReservation struct {
-	Doujin_Id      primitive.ObjectID `bson:"doujin_id" json:"doujin_id"`
-	Datetime_added time.Time          `bson:"datetime_added" json:"datetime_added"`
+type User struct {
+	DiscordId         int    `json:"discord_id"`
+	DiscordName       string `json:"discord_name"`
+	DiscordGlobalName string `json:"discord_global_name"`
 }
 
-type User struct {
-	Id           primitive.ObjectID  `bson:"_id" json:"_id"`
-	Discord_Id   int                 `bson:"discord_id" json:"discord_id"`
-	Reservations []DoujinReservation `bson:"reservations" json:"reservations"`
+type UserWithMetadata struct {
+	User
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 func (user User) String() string {
-	return fmt.Sprintf("{Id: %s, Discord_Id: %d}", user.Id, user.Discord_Id)
+	return fmt.Sprintf("{DiscordId: %d DiscordName: %s DiscordGlobalName: %s}\n", user.DiscordId, user.DiscordName, user.DiscordGlobalName)
 }

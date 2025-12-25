@@ -1,0 +1,54 @@
+package service
+
+import (
+	"errors"
+	"net/http"
+
+	"github.com/jackc/pgx/v5"
+	"github.com/rchhong/comiket-backend/dao"
+	"github.com/rchhong/comiket-backend/models"
+)
+
+type ReservationService struct {
+	reservationDAO *dao.ReservationDAO
+	userService    *UserService
+	doujinService  *DoujinService
+}
+
+func NewReservationService(reservationDAO *dao.ReservationDAO, userService *UserService, doujinService *DoujinService) *ReservationService {
+	return &ReservationService{
+		reservationDAO: reservationDAO,
+		userService:    userService,
+		doujinService:  doujinService,
+	}
+}
+
+func (reservationService *ReservationService) CreateReservation(melonbooksId int, discordId int64, user models.User) (*models.ReservationWithMetadata, error) {
+	// Create user, doujin if they don't exist yet
+	_, err := reservationService.userService.UpsertUser(discordId, user)
+	if err != nil {
+		return nil, models.StatusError{Err: err, StatusCode: http.StatusInternalServerError}
+	}
+	_, err = reservationService.doujinService.UpsertDoujin(melonbooksId)
+	if err != nil {
+		return nil, models.StatusError{Err: err, StatusCode: http.StatusInternalServerError}
+	}
+
+	existingReservation, err := reservationService.reservationDAO.GetReservationByMelonbooksIdDiscordId(melonbooksId, discordId)
+	if err != nil {
+		if errors.Is(pgx.ErrNoRows, err) {
+			return reservationService.reservationDAO.CreateReservation(melonbooksId, discordId)
+		}
+		return nil, models.StatusError{Err: err, StatusCode: http.StatusInternalServerError}
+	}
+
+	return existingReservation, nil
+}
+
+func (reservationService *ReservationService) GetAllReservationsForUser(discordId int64) ([]models.DoujinWithMetadata, error) {
+	return reservationService.reservationDAO.GetAllReservationsForUser(discordId)
+}
+
+func (reservationService *ReservationService) DeleteReservation(melonbooksId int, discordId int64) error {
+	return reservationService.reservationDAO.DeleteReservation(melonbooksId, discordId)
+}

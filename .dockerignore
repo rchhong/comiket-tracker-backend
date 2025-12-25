@@ -29,3 +29,5 @@ tmp/
 .gitignore
 Dockerfile
 docker-compose.yml
+media/
+dbdata/

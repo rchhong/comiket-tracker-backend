@@ -1,39 +1,53 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 
+	"github.com/rchhong/comiket-backend/controllers"
 	"github.com/rchhong/comiket-backend/dao"
-
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"github.com/rchhong/comiket-backend/db"
+	"github.com/rchhong/comiket-backend/scrape"
+	"github.com/rchhong/comiket-backend/service"
+	"github.com/rchhong/comiket-backend/utils"
 )
 
 func main() {
 	mux := http.NewServeMux()
 
-	dao := dao.NewDAO(os.Getenv("DATABASE_URL"))
-	defer dao.Close()
+	postgresDB := db.InitializeDB()
+	defer postgresDB.Teardown()
 
-	mux.HandleFunc("GET /user/{id}", func(w http.ResponseWriter, r *http.Request) {
-		idString := r.PathValue("id")
+	currencyConverter, err := scrape.NewCurrencyConverterImpl(utils.CURRENCY_API_URL, os.Getenv("CURRENCY_API_KEY"), "JPY", "USD")
+	if err != nil {
+		log.Fatalf("[ERROR] unable to retrieve currency conversion rate: %v", err)
+	}
 
-		id, err := primitive.ObjectIDFromHex(idString)
-		if err != nil {
-			http.Error(w, fmt.Sprintf("Unable to decode Id %s", idString), http.StatusBadRequest)
-		}
+	melonbooksScraper := scrape.NewMelonbooksScraper(currencyConverter)
+	melonbooksScraperService := service.NewMelonbooksScraperService(melonbooksScraper)
 
-		user, err := dao.RetrieveUserById(id)
-		if err != nil {
-			http.Error(w, fmt.Sprintf("Unable to decode retrieve user with Id %s: %s", idString, err), http.StatusBadRequest)
-		}
-		w.Header().Set("Content-Type", "application/json")
-		fmt.Printf("user: %s", user)
-		json.NewEncoder(w).Encode(user)
+	userDao := dao.NewUserDAO(postgresDB.Dbpool)
+	doujinDao := dao.NewDoujinDao(postgresDB.Dbpool)
+	reservationDao := dao.NewReservationDAO(postgresDB.Dbpool)
 
+	userService := service.NewUserService(userDao)
+	doujinService := service.NewDoujinService(doujinDao, melonbooksScraperService)
+	reservationService := service.NewReservationService(reservationDao, userService, doujinService)
+	adminService := service.NewAdminService(reservationDao)
+
+	userController := controllers.NewUserController(userService, reservationService)
+	doujinController := controllers.NewDoujinController(doujinService, reservationService)
+	adminController := controllers.NewAdminController(adminService)
+
+	userController.RegisterUserController(mux)
+	doujinController.RegisterDoujinController(mux)
+	adminController.RegisterAdminController(mux)
+
+	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("HEALTHY"))
 	})
 
 	fmt.Printf("Listening on http://localhost:3000\n")
