@@ -6,22 +6,22 @@ import (
 	"slices"
 	"strconv"
 
-	"github.com/rchhong/comiket-backend/dao"
+	"github.com/rchhong/comiket-backend/repositories"
 	"github.com/rchhong/comiket-backend/models"
 )
 
 type AdminService struct {
-	reservationDao *dao.ReservationDAO
+	reservationRepository *repositories.ReservationRepository
 }
 
-func NewAdminService(reservationDao *dao.ReservationDAO) *AdminService {
+func NewAdminService(reservationRepository *repositories.ReservationRepository) *AdminService {
 	return &AdminService{
-		reservationDao: reservationDao,
+		reservationRepository: reservationRepository,
 	}
 }
 
 func (adminService AdminService) GenerateExport() ([][]string, error) {
-	rawRows, err := adminService.reservationDao.GetRawExportData()
+	rawRows, err := adminService.reservationRepository.GetRawExportData()
 	if err != nil {
 		return nil, models.StatusError{Err: err, StatusCode: http.StatusInternalServerError}
 	}

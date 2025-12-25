@@ -4,24 +4,24 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/rchhong/comiket-backend/dao"
+	"github.com/rchhong/comiket-backend/repositories"
 	"github.com/rchhong/comiket-backend/models"
 )
 
 type DoujinService struct {
-	doujinDAO                *dao.DoujinDAO
+	doujinRepository                *repositories.DoujinRepository
 	melonbooksScraperService *MelonbooksScraperService
 }
 
-func NewDoujinService(doujinDAO *dao.DoujinDAO, melonbooksScraperService *MelonbooksScraperService) *DoujinService {
+func NewDoujinService(doujinRepository *repositories.DoujinRepository, melonbooksScraperService *MelonbooksScraperService) *DoujinService {
 	return &DoujinService{
-		doujinDAO:                doujinDAO,
+		doujinRepository:                doujinRepository,
 		melonbooksScraperService: melonbooksScraperService,
 	}
 }
 
 func (doujinService DoujinService) GetDoujinByMelonbooksId(melonbooksId int) (*models.DoujinWithMetadata, error) {
-	return doujinService.doujinDAO.GetDoujinByMelonbooksId(melonbooksId)
+	return doujinService.doujinRepository.GetDoujinByMelonbooksId(melonbooksId)
 }
 
 func (doujinService DoujinService) CreateDoujin(melonbooksId int) (*models.DoujinWithMetadata, error) {
@@ -30,7 +30,7 @@ func (doujinService DoujinService) CreateDoujin(melonbooksId int) (*models.Douji
 		return nil, models.StatusError{StatusCode: http.StatusInternalServerError, Err: err}
 	}
 
-	return doujinService.doujinDAO.CreateDoujin(*scrapedData)
+	return doujinService.doujinRepository.CreateDoujin(*scrapedData)
 }
 
 func (doujinService DoujinService) UpdateDoujin(melonbooksId int) (*models.DoujinWithMetadata, error) {
@@ -39,7 +39,7 @@ func (doujinService DoujinService) UpdateDoujin(melonbooksId int) (*models.Douji
 		return nil, models.StatusError{StatusCode: http.StatusInternalServerError, Err: err}
 	}
 
-	return doujinService.doujinDAO.UpdateDoujin(melonbooksId, *scrapedData)
+	return doujinService.doujinRepository.UpdateDoujin(melonbooksId, *scrapedData)
 }
 
 func (doujinService DoujinService) UpsertDoujin(melonbooksId int) (*models.DoujinWithMetadata, error) {
@@ -60,7 +60,7 @@ func (doujinService DoujinService) UpsertDoujin(melonbooksId int) (*models.Douji
 func (doujinService DoujinService) DeleteDoujin(melonbooksId int) error {
 	_, err := doujinService.GetDoujinByMelonbooksId(melonbooksId)
 	if err == nil {
-		return doujinService.doujinDAO.DeleteDoujin(melonbooksId)
+		return doujinService.doujinRepository.DeleteDoujin(melonbooksId)
 	}
 
 	return err

@@ -1,4 +1,4 @@
-package dao
+package postgres
 
 import (
 	"context"
@@ -11,19 +11,19 @@ import (
 	"github.com/rchhong/comiket-backend/models"
 )
 
-type UserDAO struct {
+type UserRepository struct {
 	dbpool *pgxpool.Pool
 }
 
-func NewUserDAO(dbpool *pgxpool.Pool) *UserDAO {
-	return &UserDAO{
+func NewUserRepository(dbpool *pgxpool.Pool) *UserRepository {
+	return &UserRepository{
 		dbpool: dbpool,
 	}
 }
 
-func (userDAO *UserDAO) CreateUser(discordId int64, user models.User) (*models.UserWithMetadata, error) {
+func (userRepository *UserRepository) CreateUser(discordId int64, user models.User) (*models.UserWithMetadata, error) {
 	var newUserWithMetadata models.UserWithMetadata
-	row, err := userDAO.dbpool.Query(context.Background(), `
+	row, err := userRepository.dbpool.Query(context.Background(), `
 		INSERT INTO users 
 			(discord_id, discord_name, discord_global_name) 
 		VALUES
@@ -42,17 +42,17 @@ func (userDAO *UserDAO) CreateUser(discordId int64, user models.User) (*models.U
 	return &newUserWithMetadata, nil
 }
 
-func (userDAO *UserDAO) GetUserByDiscordId(discordId int64) (*models.UserWithMetadata, error) {
+func (userRepository *UserRepository) GetUserByDiscordId(discordId int64) (*models.UserWithMetadata, error) {
 	var user models.UserWithMetadata
 
-	row, err := userDAO.dbpool.Query(context.Background(), `
+	row, err := userRepository.dbpool.Query(context.Background(), `
 		SELECT * FROM users WHERE discord_id = $1 LIMIT 1
 	`, discordId)
 	if err != nil {
 		return nil, err
 	}
 	user, err = pgx.CollectOneRow(row, pgx.RowToStructByName[models.UserWithMetadata])
-	// TODO: move this logic to service layer, not DAO layer
+	// TODO: move this logic to service layer, not Repository layer
 	// nil, nil -> 404 error
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -64,10 +64,10 @@ func (userDAO *UserDAO) GetUserByDiscordId(discordId int64) (*models.UserWithMet
 	return &user, nil
 }
 
-func (userDAO *UserDAO) UpdateUser(discordId int64, updatedUser models.User) (*models.UserWithMetadata, error) {
+func (userRepository *UserRepository) UpdateUser(discordId int64, updatedUser models.User) (*models.UserWithMetadata, error) {
 	var user models.UserWithMetadata
 
-	row, err := userDAO.dbpool.Query(context.Background(), `
+	row, err := userRepository.dbpool.Query(context.Background(), `
 		UPDATE users 
 		SET 
 			discord_name = $1, 
@@ -86,8 +86,8 @@ func (userDAO *UserDAO) UpdateUser(discordId int64, updatedUser models.User) (*m
 	return &user, nil
 }
 
-func (userDAO UserDAO) DeleteUser(discordId int64) error {
-	_, err := userDAO.dbpool.Query(context.Background(), `
+func (userRepository UserRepository) DeleteUser(discordId int64) error {
+	_, err := userRepository.dbpool.Query(context.Background(), `
 		DELETE FROM users 
 		WHERE discord_id = $1
 	`, discordId)

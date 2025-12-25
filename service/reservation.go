@@ -5,19 +5,19 @@ import (
 	"net/http"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/rchhong/comiket-backend/dao"
+	"github.com/rchhong/comiket-backend/repositories"
 	"github.com/rchhong/comiket-backend/models"
 )
 
 type ReservationService struct {
-	reservationDAO *dao.ReservationDAO
+	reservationRepository *repositories.ReservationRepository
 	userService    *UserService
 	doujinService  *DoujinService
 }
 
-func NewReservationService(reservationDAO *dao.ReservationDAO, userService *UserService, doujinService *DoujinService) *ReservationService {
+func NewReservationService(reservationRepository *repositories.ReservationRepository, userService *UserService, doujinService *DoujinService) *ReservationService {
 	return &ReservationService{
-		reservationDAO: reservationDAO,
+		reservationRepository: reservationRepository,
 		userService:    userService,
 		doujinService:  doujinService,
 	}
@@ -34,10 +34,10 @@ func (reservationService *ReservationService) CreateReservation(melonbooksId int
 		return nil, models.StatusError{Err: err, StatusCode: http.StatusInternalServerError}
 	}
 
-	existingReservation, err := reservationService.reservationDAO.GetReservationByMelonbooksIdDiscordId(melonbooksId, discordId)
+	existingReservation, err := reservationService.reservationRepository.GetReservationByMelonbooksIdDiscordId(melonbooksId, discordId)
 	if err != nil {
 		if errors.Is(pgx.ErrNoRows, err) {
-			return reservationService.reservationDAO.CreateReservation(melonbooksId, discordId)
+			return reservationService.reservationRepository.CreateReservation(melonbooksId, discordId)
 		}
 		return nil, models.StatusError{Err: err, StatusCode: http.StatusInternalServerError}
 	}
@@ -46,9 +46,9 @@ func (reservationService *ReservationService) CreateReservation(melonbooksId int
 }
 
 func (reservationService *ReservationService) GetAllReservationsForUser(discordId int64) ([]models.DoujinWithMetadata, error) {
-	return reservationService.reservationDAO.GetAllReservationsForUser(discordId)
+	return reservationService.reservationRepository.GetAllReservationsForUser(discordId)
 }
 
 func (reservationService *ReservationService) DeleteReservation(melonbooksId int, discordId int64) error {
-	return reservationService.reservationDAO.DeleteReservation(melonbooksId, discordId)
+	return reservationService.reservationRepository.DeleteReservation(melonbooksId, discordId)
 }

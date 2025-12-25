@@ -1,4 +1,4 @@
-package dao
+package repositories
 
 import (
 	"context"
@@ -10,19 +10,19 @@ import (
 	"github.com/rchhong/comiket-backend/models"
 )
 
-type DoujinDAO struct {
+type DoujinRepository struct {
 	dbpool *pgxpool.Pool
 }
 
-func NewDoujinDao(dbpool *pgxpool.Pool) *DoujinDAO {
-	return &DoujinDAO{
+func NewDoujinRepository(dbpool *pgxpool.Pool) *DoujinRepository {
+	return &DoujinRepository{
 		dbpool: dbpool,
 	}
 }
 
-func (doujinDAO *DoujinDAO) CreateDoujin(doujin models.Doujin) (*models.DoujinWithMetadata, error) {
+func (doujinRepository *DoujinRepository) CreateDoujin(doujin models.Doujin) (*models.DoujinWithMetadata, error) {
 	var newDoujinWithMetadata models.DoujinWithMetadata
-	row, err := doujinDAO.dbpool.Query(context.Background(), `
+	row, err := doujinRepository.dbpool.Query(context.Background(), `
 		INSERT INTO doujins 
 		(
 				melonbooks_id,
@@ -78,17 +78,17 @@ func (doujinDAO *DoujinDAO) CreateDoujin(doujin models.Doujin) (*models.DoujinWi
 
 // TODO: Create method to retrieve all doujins
 
-func (doujinDAO *DoujinDAO) GetDoujinByMelonbooksId(melonbooksId int) (*models.DoujinWithMetadata, error) {
+func (doujinRepository *DoujinRepository) GetDoujinByMelonbooksId(melonbooksId int) (*models.DoujinWithMetadata, error) {
 	var doujin models.DoujinWithMetadata
 
-	row, err := doujinDAO.dbpool.Query(context.Background(), `
+	row, err := doujinRepository.dbpool.Query(context.Background(), `
 		SELECT * FROM doujins WHERE melonbooks_id = $1
 	`, melonbooksId)
 	if err != nil {
 		return nil, err
 	}
 	doujin, err = pgx.CollectOneRow(row, pgx.RowToStructByName[models.DoujinWithMetadata])
-	// TODO: move this logic to service layer, not DAO layer
+	// TODO: move this logic to service layer, not Repository layer
 	// nil, nil -> 404 error
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -99,10 +99,10 @@ func (doujinDAO *DoujinDAO) GetDoujinByMelonbooksId(melonbooksId int) (*models.D
 	return &doujin, nil
 }
 
-func (doujinDAO *DoujinDAO) UpdateDoujin(melonbooksId int, updatedDoujin models.Doujin) (*models.DoujinWithMetadata, error) {
+func (doujinRepository *DoujinRepository) UpdateDoujin(melonbooksId int, updatedDoujin models.Doujin) (*models.DoujinWithMetadata, error) {
 	var doujin models.DoujinWithMetadata
 
-	row, err := doujinDAO.dbpool.Query(context.Background(), `
+	row, err := doujinRepository.dbpool.Query(context.Background(), `
 		UPDATE doujins 
 		SET
 				title = $2,
@@ -141,8 +141,8 @@ func (doujinDAO *DoujinDAO) UpdateDoujin(melonbooksId int, updatedDoujin models.
 	return &doujin, nil
 }
 
-func (doujinDAO DoujinDAO) DeleteDoujin(melonbooksId int) error {
-	_, err := doujinDAO.dbpool.Query(context.Background(), `
+func (doujinRepository DoujinRepository) DeleteDoujin(melonbooksId int) error {
+	_, err := doujinRepository.dbpool.Query(context.Background(), `
 		DELETE FROM doujins 
 		WHERE melonbooks_id = $1
 	`, melonbooksId)

@@ -1,4 +1,4 @@
-package dao
+package repositories
 
 import (
 	"context"
@@ -8,19 +8,19 @@ import (
 	"github.com/rchhong/comiket-backend/models"
 )
 
-type ReservationDAO struct {
+type ReservationRepository struct {
 	dbpool *pgxpool.Pool
 }
 
-func NewReservationDAO(dbpool *pgxpool.Pool) *ReservationDAO {
-	return &ReservationDAO{
+func NewReservationRepository(dbpool *pgxpool.Pool) *ReservationRepository {
+	return &ReservationRepository{
 		dbpool: dbpool,
 	}
 }
 
-func (reservationDAO *ReservationDAO) CreateReservation(melonbooksId int, discordId int64) (*models.ReservationWithMetadata, error) {
+func (reservationRepository *ReservationRepository) CreateReservation(melonbooksId int, discordId int64) (*models.ReservationWithMetadata, error) {
 	var newReservation models.ReservationWithMetadata
-	row, err := reservationDAO.dbpool.Query(context.Background(), `
+	row, err := reservationRepository.dbpool.Query(context.Background(), `
 		INSERT INTO reservations 
 			(melonbooks_id, discord_id) 
 		VALUES
@@ -39,10 +39,10 @@ func (reservationDAO *ReservationDAO) CreateReservation(melonbooksId int, discor
 	return &newReservation, nil
 }
 
-func (reservationDAO *ReservationDAO) GetReservationByReservationId(reservationId int64) (*models.ReservationWithMetadata, error) {
+func (reservationRepository *ReservationRepository) GetReservationByReservationId(reservationId int64) (*models.ReservationWithMetadata, error) {
 	var reservation models.ReservationWithMetadata
 
-	row, err := reservationDAO.dbpool.Query(context.Background(), `
+	row, err := reservationRepository.dbpool.Query(context.Background(), `
 		SELECT * FROM reservations WHERE reservation_id = $1 LIMIT 1
 	`, reservationId)
 	if err != nil {
@@ -55,10 +55,10 @@ func (reservationDAO *ReservationDAO) GetReservationByReservationId(reservationI
 	return &reservation, nil
 }
 
-func (reservationDAO *ReservationDAO) GetReservationByMelonbooksIdDiscordId(melonbooksId int, discordId int64) (*models.ReservationWithMetadata, error) {
+func (reservationRepository *ReservationRepository) GetReservationByMelonbooksIdDiscordId(melonbooksId int, discordId int64) (*models.ReservationWithMetadata, error) {
 	var reservation models.ReservationWithMetadata
 
-	row, err := reservationDAO.dbpool.Query(context.Background(), `
+	row, err := reservationRepository.dbpool.Query(context.Background(), `
 		SELECT * FROM reservations WHERE melonbooks_id = $1 AND discord_id = $2 LIMIT 1
 	`, melonbooksId, discordId)
 	if err != nil {
@@ -71,9 +71,9 @@ func (reservationDAO *ReservationDAO) GetReservationByMelonbooksIdDiscordId(melo
 	return &reservation, nil
 }
 
-func (reservationDAO ReservationDAO) DeleteReservation(melonbooksId int, discordId int64) error {
+func (reservationRepository ReservationRepository) DeleteReservation(melonbooksId int, discordId int64) error {
 	// TODO: should this be a no-op if the resource doesn't exist
-	_, err := reservationDAO.dbpool.Query(context.Background(), `
+	_, err := reservationRepository.dbpool.Query(context.Background(), `
 		DELETE FROM reservations 
 		WHERE melonbooks_id = $1 AND discord_id = $2
 	`, melonbooksId, discordId)
@@ -82,10 +82,10 @@ func (reservationDAO ReservationDAO) DeleteReservation(melonbooksId int, discord
 }
 
 // TODO: Create function to get all reservations for doujin
-func (reservationDAO ReservationDAO) GetAllReservationsForUser(discordId int64) ([]models.DoujinWithMetadata, error) {
+func (reservationRepository ReservationRepository) GetAllReservationsForUser(discordId int64) ([]models.DoujinWithMetadata, error) {
 	var reservations []models.DoujinWithMetadata
 
-	rows, err := reservationDAO.dbpool.Query(context.Background(), `
+	rows, err := reservationRepository.dbpool.Query(context.Background(), `
 		WITH user_reservations AS (
 			SELECT melonbooks_id FROM reservations WHERE discord_id = $1
 		) 
@@ -102,10 +102,10 @@ func (reservationDAO ReservationDAO) GetAllReservationsForUser(discordId int64) 
 	return reservations, nil
 }
 
-func (reservationDAO ReservationDAO) GetRawExportData() ([]models.ExportRow, error) {
+func (reservationRepository ReservationRepository) GetRawExportData() ([]models.ExportRow, error) {
 	var exportRows []models.ExportRow
 
-	rows, err := reservationDAO.dbpool.Query(context.Background(), `
+	rows, err := reservationRepository.dbpool.Query(context.Background(), `
 		SELECT 
 			r.melonbooks_id, 
 			r.discord_id, 
