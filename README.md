@@ -30,4 +30,4 @@ docker compose down
 
 # Design
 
-![](./media/sql.png)
+![](./assets/sql.png)
