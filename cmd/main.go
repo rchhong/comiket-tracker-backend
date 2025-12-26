@@ -17,7 +17,10 @@ import (
 func main() {
 	mux := http.NewServeMux()
 
-	postgresDB := db.InitializeDB()
+	postgresDB, err := db.InitializeDB()
+	if err != nil {
+		log.Fatalf("Unable to setup database: %s", err)
+	}
 	defer postgresDB.Teardown()
 
 	currencyConverter, err := ipgeoapi.NewCurrencyConverterIpGeoAPI(ipgeoapi.IPGEO_API_CURRENCY_API_URL, os.Getenv("CURRENCY_API_KEY"), "JPY", "USD")
