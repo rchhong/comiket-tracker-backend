@@ -7,9 +7,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/rchhong/comiket-backend/controllers/dto"
 	"github.com/rchhong/comiket-backend/service"
-
-	"github.com/rchhong/comiket-backend/models"
 )
 
 type ExportController struct {
@@ -28,14 +27,8 @@ func (exportController ExportController) RegisterExportController(mux *http.Serv
 	mux.HandleFunc(fmt.Sprintf("%s/export", exportController.prefix), func(w http.ResponseWriter, r *http.Request) {
 		export, err := exportController.exportService.GenerateExport()
 		if err != nil {
-			switch e := err.(type) {
-			case models.Error:
-				w.WriteHeader(e.Status())
-			default:
-				w.WriteHeader(http.StatusInternalServerError)
-			}
-
-			json.NewEncoder(w).Encode(models.ErrorResponse{Message: err.Error()})
+			w.WriteHeader(err.Status())
+			json.NewEncoder(w).Encode(dto.ComiketBackendErrorResponse{Message: err.Error()})
 			return
 		}
 

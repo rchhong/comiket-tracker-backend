@@ -2,8 +2,6 @@ package postgres
 
 import (
 	"context"
-	"errors"
-	"net/http"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -87,15 +85,12 @@ func (doujinRepository *DoujinRepositoryPostgres) GetDoujinByMelonbooksId(melonb
 	if err != nil {
 		return nil, err
 	}
+
 	doujin, err = pgx.CollectOneRow(row, pgx.RowToStructByName[models.DoujinWithMetadata])
-	// TODO: move this logic to service layer, not Repository layer
-	// nil, nil -> 404 error
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, models.StatusError{Err: err, StatusCode: http.StatusNotFound}
-		}
 		return nil, err
 	}
+
 	return &doujin, nil
 }
 

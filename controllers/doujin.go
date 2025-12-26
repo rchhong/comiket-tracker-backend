@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/rchhong/comiket-backend/models"
+	"github.com/rchhong/comiket-backend/controllers/dto"
 	"github.com/rchhong/comiket-backend/service"
 )
 
@@ -26,25 +26,18 @@ func (doujinController DoujinController) RegisterDoujinController(mux *http.Serv
 	mux.HandleFunc(fmt.Sprintf("GET %s/{melonbooksId}", doujinController.prefix), func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
-		melonbooksId, err := strconv.ParseInt(r.PathValue("melonbooksId"), 10, 64)
-		if err != nil {
+		melonbooksId, parseErr := strconv.ParseInt(r.PathValue("melonbooksId"), 10, 64)
+		if parseErr != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(models.ErrorResponse{Message: err.Error()})
+			json.NewEncoder(w).Encode(dto.ComiketBackendErrorResponse{Message: parseErr.Error()})
 			return
 		}
 
 		doujin, err := doujinController.doujinService.GetDoujinByMelonbooksId(int(melonbooksId))
 		if err != nil {
-			switch e := err.(type) {
-			case models.Error:
-				w.WriteHeader(e.Status())
-			default:
-				w.WriteHeader(http.StatusInternalServerError)
-			}
-
-			json.NewEncoder(w).Encode(models.ErrorResponse{Message: err.Error()})
+			w.WriteHeader(err.Status())
+			json.NewEncoder(w).Encode(dto.ComiketBackendErrorResponse{Message: err.Error()})
 			return
-
 		}
 
 		w.WriteHeader(http.StatusCreated)
@@ -57,25 +50,18 @@ func (doujinController DoujinController) RegisterDoujinController(mux *http.Serv
 	mux.HandleFunc(fmt.Sprintf("PUT %s/{melonbooksId}", doujinController.prefix), func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
-		melonbooksId, err := strconv.ParseInt(r.PathValue("melonbooksId"), 10, 64)
-		if err != nil {
+		melonbooksId, parseErr := strconv.ParseInt(r.PathValue("melonbooksId"), 10, 64)
+		if parseErr != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(models.ErrorResponse{Message: err.Error()})
+			json.NewEncoder(w).Encode(dto.ComiketBackendErrorResponse{Message: parseErr.Error()})
 			return
 		}
 
 		doujin, err := doujinController.doujinService.UpsertDoujin(int(melonbooksId))
 		if err != nil {
-			switch e := err.(type) {
-			case models.Error:
-				w.WriteHeader(e.Status())
-			default:
-				w.WriteHeader(http.StatusInternalServerError)
-			}
-
-			json.NewEncoder(w).Encode(models.ErrorResponse{Message: err.Error()})
+			w.WriteHeader(err.Status())
+			json.NewEncoder(w).Encode(dto.ComiketBackendErrorResponse{Message: err.Error()})
 			return
-
 		}
 
 		w.WriteHeader(http.StatusAccepted)

@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/rchhong/comiket-backend/controllers/dto"
 	"github.com/rchhong/comiket-backend/models"
 	"github.com/rchhong/comiket-backend/service"
 )
@@ -23,38 +24,32 @@ func (reservationController *ReservationController) RegisterReservationControlle
 	mux.HandleFunc("PUT /doujins/{melonbooksId}/reservations/{discordId}", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
-		melonbooksId, err := strconv.ParseInt(r.PathValue("melonbooksId"), 10, 64)
-		if err != nil {
+		melonbooksId, parseErr := strconv.ParseInt(r.PathValue("melonbooksId"), 10, 64)
+		if parseErr != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(models.ErrorResponse{Message: err.Error()})
+			json.NewEncoder(w).Encode(dto.ComiketBackendErrorResponse{Message: parseErr.Error()})
 			return
 		}
 
-		discordId, err := strconv.ParseInt(r.PathValue("discordId"), 10, 64)
-		if err != nil {
+		discordId, parseErr := strconv.ParseInt(r.PathValue("discordId"), 10, 64)
+		if parseErr != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(models.ErrorResponse{Message: err.Error()})
+			json.NewEncoder(w).Encode(dto.ComiketBackendErrorResponse{Message: parseErr.Error()})
 			return
 		}
 
 		var user models.User
-		err = json.NewDecoder(r.Body).Decode(&user)
-		if err != nil {
+		parseErr = json.NewDecoder(r.Body).Decode(&user)
+		if parseErr != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(models.ErrorResponse{Message: err.Error()})
+			json.NewEncoder(w).Encode(dto.ComiketBackendErrorResponse{Message: parseErr.Error()})
 			return
 		}
 
 		reservation, err := reservationController.reservationService.CreateReservation(int(melonbooksId), discordId, user)
 		if err != nil {
-			switch e := err.(type) {
-			case models.Error:
-				w.WriteHeader(e.Status())
-			default:
-				w.WriteHeader(http.StatusInternalServerError)
-			}
-
-			json.NewEncoder(w).Encode(models.ErrorResponse{Message: err.Error()})
+			w.WriteHeader(err.Status())
+			json.NewEncoder(w).Encode(dto.ComiketBackendErrorResponse{Message: err.Error()})
 			return
 
 		}
@@ -69,22 +64,17 @@ func (reservationController *ReservationController) RegisterReservationControlle
 	mux.HandleFunc("GET /users/{discordId}/reservations", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
-		discordId, err := strconv.ParseInt(r.PathValue("discordId"), 10, 64)
-		if err != nil {
+		discordId, parseErr := strconv.ParseInt(r.PathValue("discordId"), 10, 64)
+		if parseErr != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(models.ErrorResponse{Message: err.Error()})
+			json.NewEncoder(w).Encode(dto.ComiketBackendErrorResponse{Message: parseErr.Error()})
 			return
 		}
 
 		reservations, err := reservationController.reservationService.GetAllReservationsForUser(discordId)
 		if err != nil {
-			switch e := err.(type) {
-			case models.Error:
-				w.WriteHeader(e.Status())
-			default:
-				w.WriteHeader(http.StatusInternalServerError)
-			}
-			json.NewEncoder(w).Encode(models.ErrorResponse{Message: err.Error()})
+			w.WriteHeader(err.Status())
+			json.NewEncoder(w).Encode(dto.ComiketBackendErrorResponse{Message: err.Error()})
 			return
 		}
 
@@ -98,30 +88,24 @@ func (reservationController *ReservationController) RegisterReservationControlle
 	mux.HandleFunc("DELETE /users/{discordId}/reservations/{melonbooksId}", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
-		discordId, err := strconv.ParseInt(r.PathValue("discordId"), 10, 64)
-		if err != nil {
+		discordId, parseErr := strconv.ParseInt(r.PathValue("discordId"), 10, 64)
+		if parseErr != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(models.ErrorResponse{Message: err.Error()})
+			json.NewEncoder(w).Encode(dto.ComiketBackendErrorResponse{Message: parseErr.Error()})
 			return
 		}
 
-		melonbooksId, err := strconv.ParseInt(r.PathValue("melonbooksId"), 10, 64)
-		if err != nil {
+		melonbooksId, parseErr := strconv.ParseInt(r.PathValue("melonbooksId"), 10, 64)
+		if parseErr != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(models.ErrorResponse{Message: err.Error()})
+			json.NewEncoder(w).Encode(dto.ComiketBackendErrorResponse{Message: parseErr.Error()})
 			return
 		}
 
-		err = reservationController.reservationService.DeleteReservation(int(melonbooksId), discordId)
+		err := reservationController.reservationService.DeleteReservation(int(melonbooksId), discordId)
 		if err != nil {
-			switch e := err.(type) {
-			case models.Error:
-				w.WriteHeader(e.Status())
-			default:
-				w.WriteHeader(http.StatusInternalServerError)
-			}
-
-			json.NewEncoder(w).Encode(models.ErrorResponse{Message: err.Error()})
+			w.WriteHeader(err.Status())
+			json.NewEncoder(w).Encode(dto.ComiketBackendErrorResponse{Message: err.Error()})
 			return
 
 		}

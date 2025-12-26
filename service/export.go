@@ -20,10 +20,10 @@ func NewExportService(exportRepository repositories.ExportRepository) *ExportSer
 	}
 }
 
-func (exportService ExportService) GenerateExport() ([][]string, error) {
+func (exportService ExportService) GenerateExport() ([][]string, *models.ComiketBackendError) {
 	rawRows, err := exportService.exportRepository.GetRawExportData()
 	if err != nil {
-		return nil, models.StatusError{Err: err, StatusCode: http.StatusInternalServerError}
+		return nil, &models.ComiketBackendError{Err: err, StatusCode: http.StatusInternalServerError}
 	}
 
 	headers := []string{

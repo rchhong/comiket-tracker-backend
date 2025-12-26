@@ -1,23 +1,14 @@
 package models
 
-type Error interface {
-	error
-	Status() int
-}
-
-type StatusError struct {
+type ComiketBackendError struct {
 	Err        error
 	StatusCode int
 }
 
-func (statusError StatusError) Status() int {
-	return statusError.StatusCode
+func (comiketBackendError ComiketBackendError) Status() int {
+	return comiketBackendError.StatusCode
 }
 
-func (statusError StatusError) Error() string {
-	return statusError.Err.Error()
-}
-
-type ErrorResponse struct {
-	Message string `json:"message"`
+func (comiketBackendError ComiketBackendError) Error() string {
+	return comiketBackendError.Err.Error()
 }

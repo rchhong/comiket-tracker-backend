@@ -2,9 +2,6 @@ package postgres
 
 import (
 	"context"
-	"errors"
-	"log"
-	"net/http"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -51,14 +48,9 @@ func (userRepository *UserRepositoryPostgres) GetUserByDiscordId(discordId int64
 	if err != nil {
 		return nil, err
 	}
+
 	user, err = pgx.CollectOneRow(row, pgx.RowToStructByName[models.UserWithMetadata])
-	// TODO: move this logic to service layer, not Repository layer
-	// nil, nil -> 404 error
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			log.Printf("[WARNING] user with discordId %d does not exist", discordId)
-			return nil, models.StatusError{Err: err, StatusCode: http.StatusNotFound}
-		}
 		return nil, err
 	}
 	return &user, nil
@@ -79,6 +71,7 @@ func (userRepository *UserRepositoryPostgres) UpdateUser(discordId int64, update
 	if err != nil {
 		return nil, err
 	}
+
 	user, err = pgx.CollectOneRow(row, pgx.RowToStructByName[models.UserWithMetadata])
 	if err != nil {
 		return nil, err
