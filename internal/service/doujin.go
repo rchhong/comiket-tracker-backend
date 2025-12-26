@@ -7,18 +7,17 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/rchhong/comiket-backend/internal/models"
 	"github.com/rchhong/comiket-backend/internal/repositories"
-	"github.com/rchhong/comiket-backend/internal/scrape"
 )
 
 type DoujinService struct {
-	doujinRepository  repositories.DoujinRepository
-	melonbooksScraper *scrape.MelonbooksScraper
+	doujinRepository         repositories.DoujinRepository
+	melonbooksScraperService *MelonbooksScraperService
 }
 
-func NewDoujinService(doujinRepository repositories.DoujinRepository, melonbooksScraper *scrape.MelonbooksScraper) *DoujinService {
+func NewDoujinService(doujinRepository repositories.DoujinRepository, melonbooksScraperService *MelonbooksScraperService) *DoujinService {
 	return &DoujinService{
-		doujinRepository:  doujinRepository,
-		melonbooksScraper: melonbooksScraper,
+		doujinRepository:         doujinRepository,
+		melonbooksScraperService: melonbooksScraperService,
 	}
 }
 
@@ -35,7 +34,7 @@ func (doujinService DoujinService) GetDoujinByMelonbooksId(melonbooksId int) (*m
 }
 
 func (doujinService DoujinService) CreateDoujin(melonbooksId int) (*models.DoujinWithMetadata, *models.ComiketBackendError) {
-	scrapedData, err := doujinService.melonbooksScraper.ScrapeMelonbooksProduct(melonbooksId)
+	scrapedData, err := doujinService.melonbooksScraperService.ScrapeMelonbooksProduct(melonbooksId)
 	if err != nil {
 		return nil, &models.ComiketBackendError{StatusCode: http.StatusInternalServerError, Err: err}
 	}
@@ -49,7 +48,7 @@ func (doujinService DoujinService) CreateDoujin(melonbooksId int) (*models.Douji
 }
 
 func (doujinService DoujinService) UpdateDoujin(melonbooksId int) (*models.DoujinWithMetadata, *models.ComiketBackendError) {
-	scrapedData, err := doujinService.melonbooksScraper.ScrapeMelonbooksProduct(melonbooksId)
+	scrapedData, err := doujinService.melonbooksScraperService.ScrapeMelonbooksProduct(melonbooksId)
 	if err != nil {
 		return nil, &models.ComiketBackendError{StatusCode: http.StatusInternalServerError, Err: err}
 	}

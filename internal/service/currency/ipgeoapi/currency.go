@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/rchhong/comiket-backend/internal/currency/ipgeoapi/dto"
+	"github.com/rchhong/comiket-backend/internal/service/currency/ipgeoapi/dto"
 )
 
 type CurrencyConverterIpGeoAPI struct {

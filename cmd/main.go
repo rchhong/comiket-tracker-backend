@@ -7,11 +7,11 @@ import (
 	"os"
 
 	"github.com/rchhong/comiket-backend/internal/controllers"
-	"github.com/rchhong/comiket-backend/internal/currency/ipgeoapi"
 	"github.com/rchhong/comiket-backend/internal/db"
 	"github.com/rchhong/comiket-backend/internal/repositories/postgres"
-	"github.com/rchhong/comiket-backend/internal/scrape"
 	"github.com/rchhong/comiket-backend/internal/service"
+	"github.com/rchhong/comiket-backend/internal/service/currency/ipgeoapi"
+	"github.com/rchhong/comiket-backend/internal/service/scrape"
 )
 
 func main() {
@@ -28,15 +28,17 @@ func main() {
 		log.Fatalf("[ERROR] unable to retrieve currency conversion rate: %v", err)
 	}
 
-	melonbooksScraper := scrape.NewMelonbooksScraper(currencyConverter)
+	melonbooksScraper := scrape.NewMelonbooksScraper()
 
 	userRepository := postgres.NewUserRepositoryPostgres(postgresDB.Dbpool)
 	doujinRepository := postgres.NewDoujinRepositoryPostgres(postgresDB.Dbpool)
 	reservationRepository := postgres.NewReservationRepositoryPostgres(postgresDB.Dbpool)
 	exportRepository := postgres.NewExportRepositoryPostgres(postgresDB.Dbpool)
 
+	currencyService := service.NewCurrencyService(currencyConverter)
+	melonbooksScraperService := service.NewMelonbooksScraperService(melonbooksScraper, currencyService)
 	userService := service.NewUserService(userRepository)
-	doujinService := service.NewDoujinService(doujinRepository, melonbooksScraper)
+	doujinService := service.NewDoujinService(doujinRepository, melonbooksScraperService)
 	reservationService := service.NewReservationService(reservationRepository, userService, doujinService)
 	exportService := service.NewExportService(exportRepository)
 
