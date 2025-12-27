@@ -1,12 +1,11 @@
 package controllers
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
 
-	"github.com/rchhong/comiket-backend/internal/controllers/dto"
+	"github.com/rchhong/comiket-backend/internal/controllers/utils"
 	"github.com/rchhong/comiket-backend/internal/service"
 )
 
@@ -22,53 +21,37 @@ func NewDoujinController(doujinService *service.DoujinService) *DoujinController
 	}
 }
 
+func (doujinController DoujinController) getDoujinByMelonbooksId(r *http.Request) (int, any, error) {
+	melonbooksId, parseErr := strconv.ParseInt(r.PathValue("melonbooksId"), 10, 64)
+	if parseErr != nil {
+		return http.StatusBadRequest, nil, parseErr
+	}
+
+	doujin, err := doujinController.doujinService.GetDoujinByMelonbooksId(int(melonbooksId))
+	if err != nil {
+		return err.Status(), nil, err
+	}
+
+	return http.StatusCreated, doujin, nil
+}
+
+func (doujinController DoujinController) upsertDoujin(r *http.Request) (int, any, error) {
+	melonbooksId, parseErr := strconv.ParseInt(r.PathValue("melonbooksId"), 10, 64)
+	if parseErr != nil {
+		return http.StatusBadRequest, nil, parseErr
+	}
+
+	doujin, err := doujinController.doujinService.UpsertDoujin(int(melonbooksId))
+	if err != nil {
+		return err.Status(), nil, err
+	}
+
+	return http.StatusAccepted, doujin, nil
+}
+
 func (doujinController DoujinController) RegisterDoujinController(mux *http.ServeMux) {
-	mux.HandleFunc(fmt.Sprintf("GET %s/{melonbooksId}", doujinController.prefix), func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-
-		melonbooksId, parseErr := strconv.ParseInt(r.PathValue("melonbooksId"), 10, 64)
-		if parseErr != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(dto.ComiketBackendErrorResponse{Message: parseErr.Error()})
-			return
-		}
-
-		doujin, err := doujinController.doujinService.GetDoujinByMelonbooksId(int(melonbooksId))
-		if err != nil {
-			w.WriteHeader(err.Status())
-			json.NewEncoder(w).Encode(dto.ComiketBackendErrorResponse{Message: err.Error()})
-			return
-		}
-
-		w.WriteHeader(http.StatusCreated)
-		jsonEncoder := json.NewEncoder(w)
-		jsonEncoder.SetEscapeHTML(false)
-		jsonEncoder.Encode(doujin)
-
-	})
-
-	mux.HandleFunc(fmt.Sprintf("PUT %s/{melonbooksId}", doujinController.prefix), func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-
-		melonbooksId, parseErr := strconv.ParseInt(r.PathValue("melonbooksId"), 10, 64)
-		if parseErr != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(dto.ComiketBackendErrorResponse{Message: parseErr.Error()})
-			return
-		}
-
-		doujin, err := doujinController.doujinService.UpsertDoujin(int(melonbooksId))
-		if err != nil {
-			w.WriteHeader(err.Status())
-			json.NewEncoder(w).Encode(dto.ComiketBackendErrorResponse{Message: err.Error()})
-			return
-		}
-
-		w.WriteHeader(http.StatusAccepted)
-		jsonEncoder := json.NewEncoder(w)
-		jsonEncoder.SetEscapeHTML(false)
-		jsonEncoder.Encode(doujin)
-
-	})
+	doujinPath := fmt.Sprintf("%s/{melonbooksId}", doujinController.prefix)
+	utils.RegisterMethodToHTTPServer(mux, http.MethodGet, doujinPath, doujinController.getDoujinByMelonbooksId)
+	utils.RegisterMethodToHTTPServer(mux, http.MethodPut, doujinPath, doujinController.upsertDoujin)
 
 }
