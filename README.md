@@ -8,7 +8,7 @@ Later on, this will be disabled.
 ## Set-up
 
 1. Create a currency conversion API key here: [https://currency.getgeoapi.com/](https://currency.getgeoapi.com/)
-1. Create `.env` with the following contains
+1. Create `.env` with the following contents in the root of the project
 
 ```
 POSTGRES_USER=<postgres_username>
@@ -19,15 +19,15 @@ CURRENCY_API+KEY=<currency_api_key>
 ```
 
 ```{bash}
-docker compose up -d
+docker-compose -f ./deployments/docker-compose.yml up --detatch
 ```
 
 ## Tear-down
 
 ```{bash}
-docker compose down
+docker-compose -f ./deployments/docker-compose.yml down
 ```
 
 # Design
 
-![](./media/sql.png)
+![](./assets/sql.png)

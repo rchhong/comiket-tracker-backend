@@ -1,0 +1,62 @@
+[
+  {
+    "melonbooks_id": 3157447,
+    "title": "Pastel Flutter",
+    "price_in_yen": 1571,
+    "is_r18": false,
+    "image_preview_url": "https://melonbooks.akamaized.net/user_data/packages/resize_image.php?image=212001525453.jpg",
+    "url": "https://www.melonbooks.co.jp/detail/detail.php?product_id=3157447&adult_view=1",
+    "circle": "NIGHT WEAR",
+    "authors": ["motto"],
+    "genres": ["崩壊スターレイル"],
+    "events": ["コミックマーケット106"]
+  },
+  {
+    "melonbooks_id": 1894009,
+    "title": "原神 - 璃月紀行",
+    "price_in_yen": 1200,
+    "is_r18": true,
+    "image_preview_url": "https://melonbooks.akamaized.net/user_data/packages/resize_image.php?image=212001391850.jpg",
+    "url": "https://www.melonbooks.co.jp/detail/detail.php?product_id=1894009&adult_view=1",
+    "circle": "水之色",
+    "authors": ["WaterRing"],
+    "genres": ["原神"],
+    "events": []
+  },
+  {
+    "melonbooks_id": 1575236,
+    "title": "WHITE BULLET",
+    "price_in_yen": 2357,
+    "is_r18": false,
+    "image_preview_url": "https://melonbooks.akamaized.net/user_data/packages/resize_image.php?image=212001358587.jpg",
+    "url": "https://www.melonbooks.co.jp/detail/detail.php?product_id=1575236&adult_view=1",
+    "circle": "ミルクランプ",
+    "authors": ["トマリ"],
+    "genres": ["ホロライブ", "バーチャルユーチューバー"],
+    "events": ["コミックマーケット100"]
+  },
+  {
+    "melonbooks_id": 2450172,
+    "title": "Hololive Illustrations vol.2",
+    "price_in_yen": 1540,
+    "is_r18": false,
+    "image_preview_url": "https://melonbooks.akamaized.net/user_data/packages/resize_image.php?image=212001446510.jpg",
+    "url": "https://www.melonbooks.co.jp/detail/detail.php?product_id=2450172&adult_view=1",
+    "circle": "はるひな書店",
+    "authors": ["メリーはるひな", "水瀬レイ", "いずみけい", "眠田むぅ。"],
+    "genres": ["ホロライブ"],
+    "events": ["コミックマーケット104"]
+  },
+  {
+    "melonbooks_id": 3114247,
+    "title": "GUNHACK Vol.5 「宇宙よりも遠い場所」特集",
+    "price_in_yen": 2090,
+    "is_r18": false,
+    "image_preview_url": "https://melonbooks.akamaized.net/user_data/packages/resize_image.php?image=212001523812.jpg",
+    "url": "https://www.melonbooks.co.jp/detail/detail.php?product_id=3114247&adult_view=1",
+    "circle": "ぐんはっく",
+    "authors": ["軍手", "はっく"],
+    "genres": ["宇宙よりも遠い場所", "旅行"],
+    "events": ["コミックマーケット106"]
+  }
+]
