@@ -29,7 +29,7 @@ func (userController UserController) getUserByDiscordId(r *http.Request) (any, i
 		return nil, http.StatusBadRequest, parseErr
 	}
 
-	user, err := userController.userService.GetUserByDiscordId(discordId)
+	user, err := userController.userService.GetUserByDiscordId(r.Context(), discordId)
 	if err != nil {
 		return nil, err.Status(), err
 	}
@@ -50,7 +50,7 @@ func (userController UserController) upsertUser(r *http.Request) (any, int, erro
 		return nil, http.StatusBadRequest, parseErr
 	}
 
-	user, err := userController.userService.UpsertUser(discordId, responseBody)
+	user, err := userController.userService.UpsertUser(r.Context(), discordId, responseBody)
 	if err != nil {
 		return nil, err.Status(), err
 	}

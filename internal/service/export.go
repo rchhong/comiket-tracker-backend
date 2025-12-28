@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"maps"
 	"net/http"
 	"slices"
@@ -20,8 +21,8 @@ func NewExportService(exportRepository repositories.ExportRepository) *ExportSer
 	}
 }
 
-func (exportService ExportService) GenerateExport() ([][]string, *models.ComiketBackendError) {
-	rawRows, err := exportService.exportRepository.GetRawExportData()
+func (exportService ExportService) GenerateExport(ctx context.Context) ([][]string, *models.ComiketBackendError) {
+	rawRows, err := exportService.exportRepository.GetRawExportData(ctx)
 	if err != nil {
 		return nil, &models.ComiketBackendError{Err: err, StatusCode: http.StatusInternalServerError}
 	}

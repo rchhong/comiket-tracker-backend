@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"errors"
 	"net/http"
 
@@ -21,8 +22,8 @@ func NewDoujinService(doujinRepository repositories.DoujinRepository, melonbooks
 	}
 }
 
-func (doujinService DoujinService) GetDoujinByMelonbooksId(melonbooksId int) (*models.DoujinWithMetadata, *models.ComiketBackendError) {
-	doujin, err := doujinService.doujinRepository.GetDoujinByMelonbooksId(melonbooksId)
+func (doujinService DoujinService) GetDoujinByMelonbooksId(ctx context.Context, melonbooksId int) (*models.DoujinWithMetadata, *models.ComiketBackendError) {
+	doujin, err := doujinService.doujinRepository.GetDoujinByMelonbooksId(ctx, melonbooksId)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, &models.ComiketBackendError{Err: err, StatusCode: http.StatusNotFound}
@@ -33,13 +34,13 @@ func (doujinService DoujinService) GetDoujinByMelonbooksId(melonbooksId int) (*m
 	return doujin, nil
 }
 
-func (doujinService DoujinService) CreateDoujin(melonbooksId int) (*models.DoujinWithMetadata, *models.ComiketBackendError) {
+func (doujinService DoujinService) CreateDoujin(ctx context.Context, melonbooksId int) (*models.DoujinWithMetadata, *models.ComiketBackendError) {
 	scrapedData, err := doujinService.melonbooksScraperService.ScrapeMelonbooksProduct(melonbooksId)
 	if err != nil {
 		return nil, &models.ComiketBackendError{StatusCode: http.StatusInternalServerError, Err: err}
 	}
 
-	doujin, err := doujinService.doujinRepository.CreateDoujin(*scrapedData)
+	doujin, err := doujinService.doujinRepository.CreateDoujin(ctx, *scrapedData)
 	if err != nil {
 		return nil, &models.ComiketBackendError{StatusCode: http.StatusInternalServerError, Err: err}
 	}
@@ -47,13 +48,13 @@ func (doujinService DoujinService) CreateDoujin(melonbooksId int) (*models.Douji
 	return doujin, nil
 }
 
-func (doujinService DoujinService) UpdateDoujin(melonbooksId int) (*models.DoujinWithMetadata, *models.ComiketBackendError) {
+func (doujinService DoujinService) UpdateDoujin(ctx context.Context, melonbooksId int) (*models.DoujinWithMetadata, *models.ComiketBackendError) {
 	scrapedData, err := doujinService.melonbooksScraperService.ScrapeMelonbooksProduct(melonbooksId)
 	if err != nil {
 		return nil, &models.ComiketBackendError{StatusCode: http.StatusInternalServerError, Err: err}
 	}
 
-	updatedDoujin, err := doujinService.doujinRepository.UpdateDoujin(melonbooksId, *scrapedData)
+	updatedDoujin, err := doujinService.doujinRepository.UpdateDoujin(ctx, melonbooksId, *scrapedData)
 	if err != nil {
 		return nil, &models.ComiketBackendError{StatusCode: http.StatusInternalServerError, Err: err}
 	}
@@ -61,26 +62,26 @@ func (doujinService DoujinService) UpdateDoujin(melonbooksId int) (*models.Douji
 	return updatedDoujin, nil
 }
 
-func (doujinService DoujinService) UpsertDoujin(melonbooksId int) (*models.DoujinWithMetadata, *models.ComiketBackendError) {
-	existingDoujin, err := doujinService.GetDoujinByMelonbooksId(melonbooksId)
+func (doujinService DoujinService) UpsertDoujin(ctx context.Context, melonbooksId int) (*models.DoujinWithMetadata, *models.ComiketBackendError) {
+	existingDoujin, err := doujinService.GetDoujinByMelonbooksId(ctx, melonbooksId)
 	if existingDoujin != nil {
-		return doujinService.UpdateDoujin(melonbooksId)
+		return doujinService.UpdateDoujin(ctx, melonbooksId)
 	}
 
 	var statusError models.ComiketBackendError
 	if errors.As(err, &statusError) {
 		if statusError.StatusCode == http.StatusNotFound {
-			return doujinService.CreateDoujin(melonbooksId)
+			return doujinService.CreateDoujin(ctx, melonbooksId)
 		}
 	}
 
 	return nil, err
 }
 
-func (doujinService DoujinService) DeleteDoujin(melonbooksId int) *models.ComiketBackendError {
-	existingDoujin, err := doujinService.GetDoujinByMelonbooksId(melonbooksId)
+func (doujinService DoujinService) DeleteDoujin(ctx context.Context, melonbooksId int) *models.ComiketBackendError {
+	existingDoujin, err := doujinService.GetDoujinByMelonbooksId(ctx, melonbooksId)
 	if existingDoujin != nil {
-		err := doujinService.doujinRepository.DeleteDoujin(melonbooksId)
+		err := doujinService.doujinRepository.DeleteDoujin(ctx, melonbooksId)
 		if err != nil {
 			return &models.ComiketBackendError{Err: err, StatusCode: http.StatusInternalServerError}
 		}

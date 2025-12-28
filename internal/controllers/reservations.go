@@ -26,7 +26,7 @@ func (reservationController ReservationController) getReservationsForUser(r *htt
 		return nil, http.StatusBadRequest, parseErr
 	}
 
-	reservations, err := reservationController.reservationService.GetAllReservationsForUser(discordId)
+	reservations, err := reservationController.reservationService.GetAllReservationsForUser(r.Context(), discordId)
 	if err != nil {
 		return nil, err.Status(), err
 	}
@@ -51,7 +51,7 @@ func (reservationController ReservationController) upsertReservation(r *http.Req
 		return nil, http.StatusBadRequest, parseErr
 	}
 
-	reservation, err := reservationController.reservationService.CreateReservation(int(melonbooksId), discordId, user)
+	reservation, err := reservationController.reservationService.CreateReservation(r.Context(), int(melonbooksId), discordId, user)
 	if err != nil {
 		return nil, err.Status(), err
 
@@ -71,7 +71,7 @@ func (reservationController ReservationController) deleteReservation(r *http.Req
 		return nil, http.StatusBadRequest, parseErr
 	}
 
-	err := reservationController.reservationService.DeleteReservation(int(melonbooksId), discordId)
+	err := reservationController.reservationService.DeleteReservation(r.Context(), int(melonbooksId), discordId)
 	if err != nil {
 		return nil, err.Status(), err
 

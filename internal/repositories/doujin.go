@@ -1,10 +1,14 @@
 package repositories
 
-import "github.com/rchhong/comiket-backend/internal/models"
+import (
+	"context"
+
+	"github.com/rchhong/comiket-backend/internal/models"
+)
 
 type DoujinRepository interface {
-	CreateDoujin(doujin models.Doujin) (*models.DoujinWithMetadata, error)
-	GetDoujinByMelonbooksId(melonbooksId int) (*models.DoujinWithMetadata, error)
-	UpdateDoujin(melonbooksId int, updatedDoujin models.Doujin) (*models.DoujinWithMetadata, error)
-	DeleteDoujin(melonbooksId int) error
+	CreateDoujin(ctx context.Context, doujin models.Doujin) (*models.DoujinWithMetadata, error)
+	GetDoujinByMelonbooksId(ctx context.Context, melonbooksId int) (*models.DoujinWithMetadata, error)
+	UpdateDoujin(ctx context.Context, melonbooksId int, updatedDoujin models.Doujin) (*models.DoujinWithMetadata, error)
+	DeleteDoujin(ctx context.Context, melonbooksId int) error
 }

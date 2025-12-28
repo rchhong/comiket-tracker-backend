@@ -1,7 +1,11 @@
 package repositories
 
-import "github.com/rchhong/comiket-backend/internal/models"
+import (
+	"context"
+
+	"github.com/rchhong/comiket-backend/internal/models"
+)
 
 type ExportRepository interface {
-	GetRawExportData() ([]models.ExportRow, error)
+	GetRawExportData(ctx context.Context) ([]models.ExportRow, error)
 }

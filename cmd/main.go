@@ -30,10 +30,10 @@ func main() {
 
 	melonbooksScraper := scrape.NewMelonbooksScraper()
 
-	userRepository := postgres.NewUserRepositoryPostgres(postgresDB.Dbpool)
-	doujinRepository := postgres.NewDoujinRepositoryPostgres(postgresDB.Dbpool)
-	reservationRepository := postgres.NewReservationRepositoryPostgres(postgresDB.Dbpool)
-	exportRepository := postgres.NewExportRepositoryPostgres(postgresDB.Dbpool)
+	userRepository := postgres.NewUserRepositoryPostgres(postgresDB)
+	doujinRepository := postgres.NewDoujinRepositoryPostgres(postgresDB)
+	reservationRepository := postgres.NewReservationRepositoryPostgres(postgresDB)
+	exportRepository := postgres.NewExportRepositoryPostgres(postgresDB)
 
 	currencyService := service.NewCurrencyService(currencyConverter)
 	melonbooksScraperService := service.NewMelonbooksScraperService(melonbooksScraper, currencyService)

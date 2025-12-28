@@ -26,7 +26,7 @@ func NewExportController(exportService *service.ExportService) *ExportController
 // TODO: consider just moving this to a python script or something like that
 func (exportController ExportController) RegisterExportController(mux *http.ServeMux) {
 	mux.HandleFunc(fmt.Sprintf("%s/export", exportController.prefix), func(w http.ResponseWriter, r *http.Request) {
-		export, err := exportController.exportService.GenerateExport()
+		export, err := exportController.exportService.GenerateExport(r.Context())
 		if err != nil {
 			w.WriteHeader(err.Status())
 			json.NewEncoder(w).Encode(dto.ComiketBackendErrorResponse{Message: err.Error()})
