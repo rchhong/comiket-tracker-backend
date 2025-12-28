@@ -9,10 +9,10 @@ import (
 	"github.com/rchhong/comiket-backend/internal/controllers/dto"
 )
 
-type handlerFunc func(r *http.Request) (int, any, error)
+type handlerFunc func(r *http.Request) (any, int, error)
 
 func (h handlerFunc) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	statusCode, responseBody, err := h(r)
+	responseBody, statusCode, err := h(r)
 
 	jsonEncoder := json.NewEncoder(w)
 	jsonEncoder.SetEscapeHTML(false)

@@ -21,32 +21,32 @@ func NewDoujinController(doujinService *service.DoujinService) *DoujinController
 	}
 }
 
-func (doujinController DoujinController) getDoujinByMelonbooksId(r *http.Request) (int, any, error) {
+func (doujinController DoujinController) getDoujinByMelonbooksId(r *http.Request) (any, int, error) {
 	melonbooksId, parseErr := strconv.ParseInt(r.PathValue("melonbooksId"), 10, 64)
 	if parseErr != nil {
-		return http.StatusBadRequest, nil, parseErr
+		return nil, http.StatusBadRequest, parseErr
 	}
 
 	doujin, err := doujinController.doujinService.GetDoujinByMelonbooksId(int(melonbooksId))
 	if err != nil {
-		return err.Status(), nil, err
+		return nil, err.Status(), err
 	}
 
-	return http.StatusCreated, doujin, nil
+	return doujin, http.StatusCreated, nil
 }
 
-func (doujinController DoujinController) upsertDoujin(r *http.Request) (int, any, error) {
+func (doujinController DoujinController) upsertDoujin(r *http.Request) (any, int, error) {
 	melonbooksId, parseErr := strconv.ParseInt(r.PathValue("melonbooksId"), 10, 64)
 	if parseErr != nil {
-		return http.StatusBadRequest, nil, parseErr
+		return nil, http.StatusBadRequest, parseErr
 	}
 
 	doujin, err := doujinController.doujinService.UpsertDoujin(int(melonbooksId))
 	if err != nil {
-		return err.Status(), nil, err
+		return nil, err.Status(), err
 	}
 
-	return http.StatusAccepted, doujin, nil
+	return doujin, http.StatusAccepted, nil
 }
 
 func (doujinController DoujinController) RegisterDoujinController(mux *http.ServeMux) {

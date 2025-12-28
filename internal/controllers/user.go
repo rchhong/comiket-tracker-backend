@@ -23,39 +23,39 @@ func NewUserController(userService *service.UserService) *UserController {
 	}
 }
 
-func (userController UserController) getUserByDiscordId(r *http.Request) (int, any, error) {
+func (userController UserController) getUserByDiscordId(r *http.Request) (any, int, error) {
 	discordId, parseErr := strconv.ParseInt(r.PathValue("discordId"), 10, 64)
 	if parseErr != nil {
-		return http.StatusBadRequest, nil, parseErr
+		return nil, http.StatusBadRequest, parseErr
 	}
 
 	user, err := userController.userService.GetUserByDiscordId(discordId)
 	if err != nil {
-		return err.Status(), nil, err
+		return nil, err.Status(), err
 	}
 
-	return http.StatusOK, user, nil
+	return user, http.StatusOK, nil
 
 }
 
-func (userController UserController) upsertUser(r *http.Request) (int, any, error) {
+func (userController UserController) upsertUser(r *http.Request) (any, int, error) {
 	discordId, parseErr := strconv.ParseInt(r.PathValue("discordId"), 10, 64)
 	if parseErr != nil {
-		return http.StatusBadRequest, nil, parseErr
+		return nil, http.StatusBadRequest, parseErr
 	}
 
 	var responseBody models.User
 	parseErr = json.NewDecoder(r.Body).Decode(&responseBody)
 	if parseErr != nil {
-		return http.StatusBadRequest, nil, parseErr
+		return nil, http.StatusBadRequest, parseErr
 	}
 
 	user, err := userController.userService.UpsertUser(discordId, responseBody)
 	if err != nil {
-		return err.Status(), nil, err
+		return nil, err.Status(), err
 	}
 
-	return http.StatusAccepted, user, nil
+	return user, http.StatusAccepted, nil
 }
 
 func (userController UserController) RegisterUserController(mux *http.ServeMux) {
