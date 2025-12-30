@@ -3,11 +3,11 @@ package ipgeoapi
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"net/url"
 	"time"
 
+	"github.com/rchhong/comiket-backend/internal/logging"
 	"github.com/rchhong/comiket-backend/internal/service/currency/ipgeoapi/dto"
 )
 
@@ -46,8 +46,7 @@ func (currencyConverter *CurrencyConverterIpGeoAPI) Convert(fromCurrencyAmount f
 	if time.Since(currencyConverter.updatedAt).Hours() >= 24 {
 		err := currencyConverter.updateConversionRate()
 		if err != nil {
-			// TODO: better logging system
-			log.Printf("[WARNING] unable to update currency conversion (%v)", err)
+			logging.Logger.Warn("Unable to update currency conversion", "err", err)
 		}
 	}
 

@@ -3,7 +3,6 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/rchhong/comiket-backend/internal/controllers/dto"
@@ -20,7 +19,6 @@ func (h handlerFunc) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
 	if err != nil {
-		log.Printf("Handler error: %v", err)
 		jsonEncoder.Encode(dto.ComiketBackendErrorResponse{Message: err.Error()})
 	} else {
 		jsonEncoder.Encode(responseBody)
