@@ -6,17 +6,15 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type ComiketBackendConfigFileConfig struct {
-	LogFilePath string `yaml:"logFilePath"`
-}
-
 type ComiketBackendConfig struct {
 	App struct {
 		Port int `yaml:"port"`
 	} `yaml:"app"`
 	Logging struct {
-		LogLevel string                         `yaml:"logLevel"`
-		File     ComiketBackendConfigFileConfig `yaml:"file"`
+		LogLevel string `yaml:"logLevel"`
+		File     struct {
+			LogFilePath string `yaml:"logFilePath"`
+		} `yaml:"file"`
 	} `yaml:"logging"`
 	Db struct {
 		Postgres struct {

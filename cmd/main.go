@@ -25,10 +25,13 @@ func main() {
 		log.Fatalf("Unable to load application configuration from file: %v", err)
 	}
 
-	err = logging.InitializeLogging(config.Logging.LogLevel, &config.Logging.File)
+	err = logging.InitializeLogging(config.Logging.LogLevel, config.Logging.File.LogFilePath)
 	if err != nil {
 		log.Fatalf("Unable to setup logging: %v", err)
 	} else {
+		if config.Logging.File.LogFilePath == "" {
+			logging.Logger.Warn("No logging file was supplied, logs will only be outputted to stdout")
+		}
 		logging.Logger.Info("Initialized logging successfully")
 	}
 

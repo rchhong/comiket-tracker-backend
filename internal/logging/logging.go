@@ -4,8 +4,6 @@ import (
 	"io"
 	"log/slog"
 	"os"
-
-	"github.com/rchhong/comiket-backend/internal/config"
 )
 
 type ComiketLogger struct {
@@ -15,12 +13,11 @@ type ComiketLogger struct {
 
 var Logger ComiketLogger
 
-func InitializeLogging(rawLogLevel string, fileOutputConfiguration *config.ComiketBackendConfigFileConfig) error {
+func InitializeLogging(rawLogLevel string, filePath string) error {
 	var w io.Writer
 	var f *os.File
-	if fileOutputConfiguration != nil {
+	if filePath != "" {
 		var err error
-		filePath := fileOutputConfiguration.LogFilePath
 		f, err = os.OpenFile(filePath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 		if err != nil {
 			return err
