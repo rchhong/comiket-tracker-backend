@@ -21,13 +21,7 @@ func NewReservationRepositoryPostgres(postgresDb *db.PostgresDB) *ReservationRep
 func (reservationRepository *ReservationRepositoryPostgres) CreateReservation(ctx context.Context, melonbooksId int, discordId int64) (*models.ReservationWithMetadata, error) {
 	var newReservation models.ReservationWithMetadata
 
-	conn, err := reservationRepository.postgresDb.Dbpool.Acquire(ctx)
-	if err != nil {
-		return nil, err
-	}
-	defer conn.Conn().Close(ctx)
-
-	err = pgx.BeginFunc(ctx, conn, func(tx pgx.Tx) error {
+	err := pgx.BeginFunc(ctx, reservationRepository.postgresDb.Dbpool, func(tx pgx.Tx) error {
 		row, err := tx.Query(ctx, `
 			INSERT INTO reservations
 				(melonbooks_id, discord_id)
@@ -58,13 +52,7 @@ func (reservationRepository *ReservationRepositoryPostgres) CreateReservation(ct
 func (reservationRepository *ReservationRepositoryPostgres) GetReservationByReservationId(ctx context.Context, reservationId int64) (*models.ReservationWithMetadata, error) {
 	var reservation models.ReservationWithMetadata
 
-	conn, err := reservationRepository.postgresDb.Dbpool.Acquire(ctx)
-	if err != nil {
-		return nil, err
-	}
-	defer conn.Conn().Close(ctx)
-
-	err = pgx.BeginFunc(ctx, conn, func(tx pgx.Tx) error {
+	err := pgx.BeginFunc(ctx, reservationRepository.postgresDb.Dbpool, func(tx pgx.Tx) error {
 		row, err := tx.Query(ctx, `
 			SELECT * FROM reservations WHERE reservation_id = $1 LIMIT 1
 		`, reservationId)
@@ -90,13 +78,7 @@ func (reservationRepository *ReservationRepositoryPostgres) GetReservationByRese
 func (reservationRepository *ReservationRepositoryPostgres) GetReservationByMelonbooksIdDiscordId(ctx context.Context, melonbooksId int, discordId int64) (*models.ReservationWithMetadata, error) {
 	var reservation models.ReservationWithMetadata
 
-	conn, err := reservationRepository.postgresDb.Dbpool.Acquire(ctx)
-	if err != nil {
-		return nil, err
-	}
-	defer conn.Conn().Close(ctx)
-
-	err = pgx.BeginFunc(ctx, conn, func(tx pgx.Tx) error {
+	err := pgx.BeginFunc(ctx, reservationRepository.postgresDb.Dbpool, func(tx pgx.Tx) error {
 		row, err := tx.Query(ctx, `
 			SELECT * FROM reservations WHERE melonbooks_id = $1 AND discord_id = $2 LIMIT 1
 		`, melonbooksId, discordId)
@@ -121,13 +103,7 @@ func (reservationRepository *ReservationRepositoryPostgres) GetReservationByMelo
 
 func (reservationRepository ReservationRepositoryPostgres) DeleteReservation(ctx context.Context, melonbooksId int, discordId int64) error {
 	// TODO: should this be a no-op if the resource doesn't exist
-	conn, err := reservationRepository.postgresDb.Dbpool.Acquire(ctx)
-	if err != nil {
-		return err
-	}
-	defer conn.Conn().Close(ctx)
-
-	return pgx.BeginFunc(ctx, conn, func(tx pgx.Tx) error {
+	return pgx.BeginFunc(ctx, reservationRepository.postgresDb.Dbpool, func(tx pgx.Tx) error {
 		_, err := tx.Exec(ctx, `
 			DELETE FROM reservations
 			WHERE melonbooks_id = $1 AND discord_id = $2
@@ -135,19 +111,14 @@ func (reservationRepository ReservationRepositoryPostgres) DeleteReservation(ctx
 
 		return err
 	})
+
 }
 
 // TODO: Create function to get all reservations for doujin
 func (reservationRepository ReservationRepositoryPostgres) GetAllReservationsForUser(ctx context.Context, discordId int64) ([]models.DoujinWithMetadata, error) {
 	var reservations []models.DoujinWithMetadata
 
-	conn, err := reservationRepository.postgresDb.Dbpool.Acquire(ctx)
-	if err != nil {
-		return nil, err
-	}
-	defer conn.Conn().Close(ctx)
-
-	err = pgx.BeginFunc(ctx, conn, func(tx pgx.Tx) error {
+	err := pgx.BeginFunc(ctx, reservationRepository.postgresDb.Dbpool, func(tx pgx.Tx) error {
 		rows, err := tx.Query(ctx, `
 			WITH user_reservations AS (
 				SELECT melonbooks_id FROM reservations WHERE discord_id = $1
