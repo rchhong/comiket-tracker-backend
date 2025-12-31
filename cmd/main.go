@@ -43,7 +43,7 @@ func run() error {
 	}
 	logging.Logger.Info("Initialized logging successfully")
 
-	postgresDB, err := db.InitializeDB(config.Db.Postgres.Host, config.Db.Postgres.Port, config.Db.Postgres.DatabaseName, config.Db.Postgres.Username, config.Db.Postgres.Password)
+	postgresDB, err := db.InitializeDB(config.Db.Postgres.Host, config.Db.Postgres.Port, config.Db.Postgres.DatabaseName, config.Db.Postgres.Username, config.Db.Postgres.Password, config.Db.Postgres.PoolMinConnections, config.Db.Postgres.PoolMaxConnections)
 	if err != nil {
 		return fmt.Errorf("Unable to setup database: %v", err)
 	}

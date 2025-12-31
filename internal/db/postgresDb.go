@@ -11,16 +11,18 @@ type PostgresDB struct {
 	Dbpool *pgxpool.Pool
 }
 
-func InitializeDB(host string, port int, databaseName string, username string, password string) (*PostgresDB, error) {
-	database_url := fmt.Sprintf("postgres://%s:%s@%s:%d/%s", username, password, host, port, databaseName)
-	dbpool, err := pgxpool.New(context.Background(), database_url)
+func InitializeDB(host string, port int, databaseName string, username string, password string, poolMinConnections int, poolMaxConnections int) (*PostgresDB, error) {
+	connectionString := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?pool_min_conns=%d&pool_max_conns=%d", username, password, host, port, databaseName, poolMinConnections, poolMaxConnections)
+	dbpool, err := pgxpool.New(context.Background(), connectionString)
 	if err != nil {
 		return nil, err
 	}
 
-	return &PostgresDB{
+	postgresDB := &PostgresDB{
 		Dbpool: dbpool,
-	}, nil
+	}
+
+	return postgresDB, nil
 }
 func (postgresdb *PostgresDB) Teardown() {
 	postgresdb.Dbpool.Close()

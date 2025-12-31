@@ -18,11 +18,13 @@ type ComiketBackendConfig struct {
 	} `yaml:"logging"`
 	Db struct {
 		Postgres struct {
-			Host         string `yaml:"host"`
-			Port         int    `yaml:"port"`
-			DatabaseName string `yaml:"databaseName"`
-			Username     string `yaml:"username"`
-			Password     string `yaml:"password"`
+			Host               string `yaml:"host"`
+			Port               int    `yaml:"port"`
+			DatabaseName       string `yaml:"databaseName"`
+			Username           string `yaml:"username"`
+			Password           string `yaml:"password"`
+			PoolMinConnections int    `yaml:"poolMinConnections"`
+			PoolMaxConnections int    `yaml:"poolMaxConnections"`
 		} `yaml:"postgres"`
 	} `yaml:"db"`
 }

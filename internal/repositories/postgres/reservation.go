@@ -102,7 +102,6 @@ func (reservationRepository *ReservationRepositoryPostgres) GetReservationByMelo
 }
 
 func (reservationRepository ReservationRepositoryPostgres) DeleteReservation(ctx context.Context, melonbooksId int, discordId int64) error {
-	// TODO: should this be a no-op if the resource doesn't exist
 	return pgx.BeginFunc(ctx, reservationRepository.postgresDb.Dbpool, func(tx pgx.Tx) error {
 		_, err := tx.Exec(ctx, `
 			DELETE FROM reservations

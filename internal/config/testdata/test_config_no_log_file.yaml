@@ -11,3 +11,5 @@ db:
     databaseName: comiket
     username: username
     password: password
+    poolMinConnections: 5
+    poolMaxConnections: 50
