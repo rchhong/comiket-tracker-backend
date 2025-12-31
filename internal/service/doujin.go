@@ -62,17 +62,19 @@ func (doujinService DoujinService) UpdateDoujin(ctx context.Context, melonbooksI
 	return updatedDoujin, nil
 }
 
-func (doujinService DoujinService) UpsertDoujin(ctx context.Context, melonbooksId int) (*models.DoujinWithMetadata, *models.ComiketBackendError) {
+func (doujinService DoujinService) UpsertDoujin(ctx context.Context, melonbooksId int) (*models.DoujinWithMetadata, bool, *models.ComiketBackendError) {
 	existingDoujin, err := doujinService.GetDoujinByMelonbooksId(ctx, melonbooksId)
 	if existingDoujin != nil {
-		return doujinService.UpdateDoujin(ctx, melonbooksId)
+		updatedDoujin, err := doujinService.UpdateDoujin(ctx, melonbooksId)
+		return updatedDoujin, false, err
 	}
 
 	if errors.Is(err, pgx.ErrNoRows) {
-		return doujinService.CreateDoujin(ctx, melonbooksId)
+		createdDoujin, err := doujinService.CreateDoujin(ctx, melonbooksId)
+		return createdDoujin, true, err
 	}
 
-	return nil, err
+	return nil, false, err
 }
 
 func (doujinService DoujinService) DeleteDoujin(ctx context.Context, melonbooksId int) *models.ComiketBackendError {

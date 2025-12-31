@@ -24,12 +24,12 @@ func (reservationController ReservationController) getReservationsForUser(r *htt
 		return nil, http.StatusBadRequest, parseErr
 	}
 
-	reservations, err := reservationController.reservationService.GetAllReservationsForUser(r.Context(), discordId)
+	doujins, err := reservationController.reservationService.GetAllReservationsForUser(r.Context(), discordId)
 	if err != nil {
 		return nil, err.Status(), err
 	}
 
-	return reservations, http.StatusCreated, nil
+	return doujins, http.StatusOK, nil
 }
 
 func (reservationController ReservationController) createReservation(r *http.Request) (any, int, error) {
@@ -49,7 +49,7 @@ func (reservationController ReservationController) createReservation(r *http.Req
 
 	}
 
-	return reservation, http.StatusAccepted, nil
+	return reservation, http.StatusCreated, nil
 }
 
 func (reservationController ReservationController) deleteReservation(r *http.Request) (any, int, error) {
@@ -69,7 +69,7 @@ func (reservationController ReservationController) deleteReservation(r *http.Req
 
 	}
 
-	return nil, http.StatusAccepted, nil
+	return nil, http.StatusOK, nil
 }
 
 func (reservationController *ReservationController) RegisterReservationController(mux *http.ServeMux) {

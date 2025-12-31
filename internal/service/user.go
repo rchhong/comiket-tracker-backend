@@ -49,16 +49,18 @@ func (userService UserService) UpdateUser(ctx context.Context, discordId int64, 
 	return updatedUser, nil
 }
 
-func (userService UserService) UpsertUser(ctx context.Context, discordId int64, user models.User) (*models.UserWithMetadata, *models.ComiketBackendError) {
+func (userService UserService) UpsertUser(ctx context.Context, discordId int64, user models.User) (*models.UserWithMetadata, bool, *models.ComiketBackendError) {
 	existingUser, err := userService.GetUserByDiscordId(ctx, discordId)
 	if existingUser != nil {
-		return userService.UpdateUser(ctx, discordId, user)
+		updatedUser, err := userService.UpdateUser(ctx, discordId, user)
+		return updatedUser, false, err
 	}
 
 	if errors.Is(err, pgx.ErrNoRows) {
-		return userService.CreateUser(ctx, discordId, user)
+		createdUser, err := userService.CreateUser(ctx, discordId, user)
+		return createdUser, true, err
 	}
-	return nil, err
+	return nil, false, err
 }
 
 func (userService UserService) DeleteUser(ctx context.Context, discordId int64) *models.ComiketBackendError {

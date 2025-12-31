@@ -29,7 +29,7 @@ func (doujinController DoujinController) getDoujinByMelonbooksId(r *http.Request
 		return nil, err.Status(), err
 	}
 
-	return doujin, http.StatusCreated, nil
+	return doujin, http.StatusOK, nil
 }
 
 func (doujinController DoujinController) upsertDoujin(r *http.Request) (any, int, error) {
@@ -38,12 +38,16 @@ func (doujinController DoujinController) upsertDoujin(r *http.Request) (any, int
 		return nil, http.StatusBadRequest, parseErr
 	}
 
-	doujin, err := doujinController.doujinService.UpsertDoujin(r.Context(), int(melonbooksId))
+	doujin, wasCreated, err := doujinController.doujinService.UpsertDoujin(r.Context(), int(melonbooksId))
 	if err != nil {
 		return nil, err.Status(), err
 	}
 
-	return doujin, http.StatusAccepted, nil
+	if wasCreated {
+		return doujin, http.StatusCreated, nil
+	}
+
+	return doujin, http.StatusOK, nil
 }
 
 func (doujinController DoujinController) RegisterDoujinController(mux *http.ServeMux) {

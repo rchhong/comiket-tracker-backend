@@ -47,12 +47,16 @@ func (userController UserController) upsertUser(r *http.Request) (any, int, erro
 		return nil, http.StatusBadRequest, parseErr
 	}
 
-	user, err := userController.userService.UpsertUser(r.Context(), discordId, responseBody)
+	user, wasCreated, err := userController.userService.UpsertUser(r.Context(), discordId, responseBody)
 	if err != nil {
 		return nil, err.Status(), err
 	}
 
-	return user, http.StatusAccepted, nil
+	if wasCreated {
+		return user, http.StatusCreated, nil
+	}
+
+	return user, http.StatusOK, nil
 }
 
 func (userController UserController) RegisterUserController(mux *http.ServeMux) {
