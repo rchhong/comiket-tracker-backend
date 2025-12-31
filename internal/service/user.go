@@ -50,16 +50,13 @@ func (userService UserService) UpdateUser(ctx context.Context, discordId int64, 
 }
 
 func (userService UserService) UpsertUser(ctx context.Context, discordId int64, user models.User) (*models.UserWithMetadata, *models.ComiketBackendError) {
-	_, err := userService.GetUserByDiscordId(ctx, discordId)
-	if err == nil {
+	existingUser, err := userService.GetUserByDiscordId(ctx, discordId)
+	if existingUser != nil {
 		return userService.UpdateUser(ctx, discordId, user)
 	}
 
-	var statusError models.ComiketBackendError
-	if errors.As(err, &statusError) {
-		if statusError.StatusCode == http.StatusNotFound {
-			return userService.CreateUser(ctx, discordId, user)
-		}
+	if errors.Is(err, pgx.ErrNoRows) {
+		return userService.CreateUser(ctx, discordId, user)
 	}
 	return nil, err
 }

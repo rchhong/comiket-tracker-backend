@@ -68,11 +68,8 @@ func (doujinService DoujinService) UpsertDoujin(ctx context.Context, melonbooksI
 		return doujinService.UpdateDoujin(ctx, melonbooksId)
 	}
 
-	var statusError models.ComiketBackendError
-	if errors.As(err, &statusError) {
-		if statusError.StatusCode == http.StatusNotFound {
-			return doujinService.CreateDoujin(ctx, melonbooksId)
-		}
+	if errors.Is(err, pgx.ErrNoRows) {
+		return doujinService.CreateDoujin(ctx, melonbooksId)
 	}
 
 	return nil, err
