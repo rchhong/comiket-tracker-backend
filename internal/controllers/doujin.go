@@ -32,6 +32,15 @@ func (doujinController DoujinController) getDoujinByMelonbooksId(r *http.Request
 	return doujin, http.StatusOK, nil
 }
 
+func (doujinController DoujinController) getDoujins(r *http.Request) (any, int, error) {
+	doujins, err := doujinController.doujinService.GetDoujins(r.Context())
+	if err != nil {
+		return nil, err.Status(), err
+	}
+
+	return doujins, http.StatusOK, nil
+}
+
 func (doujinController DoujinController) upsertDoujin(r *http.Request) (any, int, error) {
 	melonbooksId, parseErr := strconv.ParseInt(r.PathValue("melonbooksId"), 10, 64)
 	if parseErr != nil {
@@ -52,6 +61,7 @@ func (doujinController DoujinController) upsertDoujin(r *http.Request) (any, int
 
 func (doujinController DoujinController) RegisterDoujinController(mux *http.ServeMux) {
 	utils.RegisterMethodToHTTPServer(mux, http.MethodGet, "/doujins/{melonbooksId}", doujinController.getDoujinByMelonbooksId)
+	utils.RegisterMethodToHTTPServer(mux, http.MethodGet, "/doujins", doujinController.getDoujins)
 	utils.RegisterMethodToHTTPServer(mux, http.MethodPut, "/doujins/{melonbooksId}", doujinController.upsertDoujin)
 
 }

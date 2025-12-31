@@ -22,18 +22,6 @@ func NewDoujinService(doujinRepository repositories.DoujinRepository, melonbooks
 	}
 }
 
-func (doujinService DoujinService) GetDoujinByMelonbooksId(ctx context.Context, melonbooksId int) (*models.DoujinWithMetadata, *models.ComiketBackendError) {
-	doujin, err := doujinService.doujinRepository.GetDoujinByMelonbooksId(ctx, melonbooksId)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, &models.ComiketBackendError{Err: err, StatusCode: http.StatusNotFound}
-		} else {
-			return nil, &models.ComiketBackendError{Err: err, StatusCode: http.StatusInternalServerError}
-		}
-	}
-	return doujin, nil
-}
-
 func (doujinService DoujinService) CreateDoujin(ctx context.Context, melonbooksId int) (*models.DoujinWithMetadata, *models.ComiketBackendError) {
 	scrapedData, err := doujinService.melonbooksScraperService.ScrapeMelonbooksProduct(melonbooksId)
 	if err != nil {
@@ -46,6 +34,26 @@ func (doujinService DoujinService) CreateDoujin(ctx context.Context, melonbooksI
 	}
 
 	return doujin, nil
+}
+
+func (doujinService DoujinService) GetDoujinByMelonbooksId(ctx context.Context, melonbooksId int) (*models.DoujinWithMetadata, *models.ComiketBackendError) {
+	doujin, err := doujinService.doujinRepository.GetDoujinByMelonbooksId(ctx, melonbooksId)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, &models.ComiketBackendError{Err: err, StatusCode: http.StatusNotFound}
+		} else {
+			return nil, &models.ComiketBackendError{Err: err, StatusCode: http.StatusInternalServerError}
+		}
+	}
+	return doujin, nil
+}
+
+func (doujinService DoujinService) GetDoujins(ctx context.Context) ([]models.DoujinWithMetadata, *models.ComiketBackendError) {
+	doujins, err := doujinService.doujinRepository.GetDoujins(ctx)
+	if err != nil {
+		return nil, &models.ComiketBackendError{Err: err, StatusCode: http.StatusInternalServerError}
+	}
+	return doujins, nil
 }
 
 func (doujinService DoujinService) UpdateDoujin(ctx context.Context, melonbooksId int) (*models.DoujinWithMetadata, *models.ComiketBackendError) {
