@@ -1,8 +1,9 @@
 package main
 
 import (
+	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 
@@ -17,38 +18,44 @@ import (
 )
 
 func main() {
+	if err := run(); err != nil {
+		slog.Error(err.Error())
+		os.Exit(1)
+	}
+}
+
+func run() error {
 	mux := http.NewServeMux()
 
 	configPath := "/app/cmd/config.yaml"
 	config, err := config.LoadConfigFromFile(configPath)
 	if err != nil {
-		log.Fatalf("Unable to load application configuration from file: %v", err)
+		return fmt.Errorf("Unable to load application configuration from file: %v", err)
 	}
 
 	err = logging.InitializeLogging(config.Logging.LogLevel, config.Logging.File.LogFilePath)
 	if err != nil {
-		log.Fatalf("Unable to setup logging: %v", err)
-	} else {
-		if config.Logging.File.LogFilePath == "" {
-			logging.Logger.Warn("No logging file was supplied, logs will only be outputted to stdout")
-		}
-		logging.Logger.Info("Initialized logging successfully")
+		return fmt.Errorf("Unable to setup logging: %v", err)
 	}
+	defer logging.Logger.TeardownLogging()
+
+	if config.Logging.File.LogFilePath == "" {
+		logging.Logger.Warn("No logging file was supplied, logs will only be outputted to stdout")
+	}
+	logging.Logger.Info("Initialized logging successfully")
 
 	postgresDB, err := db.InitializeDB(config.Db.Postgres.Host, config.Db.Postgres.Port, config.Db.Postgres.DatabaseName, config.Db.Postgres.Username, config.Db.Postgres.Password)
 	if err != nil {
-		log.Fatalf("Unable to setup database: %v", err)
-	} else {
-		logging.Logger.Info("Initialized database successfully")
+		return fmt.Errorf("Unable to setup database: %v", err)
 	}
 	defer postgresDB.Teardown()
+	logging.Logger.Info("Initialized database successfully")
 
 	currencyConverter, err := ipgeoapi.NewCurrencyConverterIpGeoAPI(ipgeoapi.IPGEO_API_CURRENCY_API_URL, os.Getenv("CURRENCY_API_KEY"), "JPY", "USD")
 	if err != nil {
-		log.Fatalf("Unable to retrieve currency conversion rate: %v", err)
-	} else {
-		logging.Logger.Info("Initialized currency converter successfully")
+		return fmt.Errorf("Unable to retrieve currency conversion rate: %v", err)
 	}
+	logging.Logger.Info("Initialized currency converter successfully")
 
 	melonbooksScraper := scrape.NewMelonbooksScraper()
 
@@ -80,6 +87,6 @@ func main() {
 	})
 
 	logging.Logger.Info(fmt.Sprintf("Listening on http://localhost:%d", config.App.Port))
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", config.App.Port), mux))
+	return http.ListenAndServe(fmt.Sprintf(":%d", config.App.Port), mux)
 
 }
