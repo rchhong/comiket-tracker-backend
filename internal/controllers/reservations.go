@@ -53,12 +53,12 @@ func (reservationController ReservationController) createReservation(r *http.Req
 }
 
 func (reservationController ReservationController) deleteReservation(r *http.Request) (any, int, error) {
-	discordId, parseErr := strconv.ParseInt(r.PathValue("discordId"), 10, 64)
+	melonbooksId, parseErr := strconv.ParseInt(r.PathValue("melonbooksId"), 10, 64)
 	if parseErr != nil {
 		return nil, http.StatusBadRequest, parseErr
 	}
 
-	melonbooksId, parseErr := strconv.ParseInt(r.PathValue("melonbooksId"), 10, 64)
+	discordId, parseErr := strconv.ParseInt(r.PathValue("discordId"), 10, 64)
 	if parseErr != nil {
 		return nil, http.StatusBadRequest, parseErr
 	}
