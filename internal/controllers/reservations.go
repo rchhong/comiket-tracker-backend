@@ -73,7 +73,7 @@ func (reservationController ReservationController) deleteReservation(r *http.Req
 }
 
 func (reservationController *ReservationController) RegisterReservationController(mux *http.ServeMux) {
-	utils.RegisterMethodToHTTPServer(mux, http.MethodGet, "/doujins/{melonbooksId}/reservations", reservationController.getReservationsForUser)
+	utils.RegisterMethodToHTTPServer(mux, http.MethodGet, "/users/{discordId}/reservations", reservationController.getReservationsForUser)
 	utils.RegisterMethodToHTTPServer(mux, http.MethodPost, "/doujins/{melonbooksId}/reservations/{discordId}", reservationController.createReservation)
 	utils.RegisterMethodToHTTPServer(mux, http.MethodDelete, "/doujins/{melonbooksId}/reservations/{discordId}", reservationController.deleteReservation)
 }
