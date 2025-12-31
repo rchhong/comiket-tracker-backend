@@ -12,4 +12,5 @@ type ReservationRepository interface {
 	GetReservationByMelonbooksIdDiscordId(ctx context.Context, melonbooksId int, discordId int64) (*models.ReservationWithMetadata, error)
 	DeleteReservation(ctx context.Context, melonbooksId int, discordId int64) error
 	GetAllReservationsForUser(ctx context.Context, discordId int64) ([]models.DoujinWithMetadata, error)
+	GetAllReservedUsersForDoujin(ctx context.Context, melonbooksId int) ([]models.UserWithMetadata, error)
 }

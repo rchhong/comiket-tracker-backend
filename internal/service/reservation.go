@@ -53,12 +53,21 @@ func (reservationService *ReservationService) CreateReservation(ctx context.Cont
 }
 
 func (reservationService *ReservationService) GetAllReservationsForUser(ctx context.Context, discordId int64) ([]models.DoujinWithMetadata, *models.ComiketBackendError) {
-	reservations, err := reservationService.reservationRepository.GetAllReservationsForUser(ctx, discordId)
+	doujins, err := reservationService.reservationRepository.GetAllReservationsForUser(ctx, discordId)
 	if err != nil {
 		return nil, &models.ComiketBackendError{Err: err, StatusCode: http.StatusInternalServerError}
 	}
 
-	return reservations, nil
+	return doujins, nil
+}
+
+func (reservationService *ReservationService) GetAllReservedUsersForDoujin(ctx context.Context, melonbooksId int) ([]models.UserWithMetadata, *models.ComiketBackendError) {
+	users, err := reservationService.reservationRepository.GetAllReservedUsersForDoujin(ctx, melonbooksId)
+	if err != nil {
+		return nil, &models.ComiketBackendError{Err: err, StatusCode: http.StatusInternalServerError}
+	}
+
+	return users, nil
 }
 
 func (reservationService *ReservationService) DeleteReservation(ctx context.Context, melonbooksId int, discordId int64) *models.ComiketBackendError {

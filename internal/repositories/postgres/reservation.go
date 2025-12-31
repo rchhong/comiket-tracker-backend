@@ -113,7 +113,6 @@ func (reservationRepository ReservationRepositoryPostgres) DeleteReservation(ctx
 
 }
 
-// TODO: Create function to get all reservations for doujin
 func (reservationRepository ReservationRepositoryPostgres) GetAllReservationsForUser(ctx context.Context, discordId int64) ([]models.DoujinWithMetadata, error) {
 	var reservations []models.DoujinWithMetadata
 
@@ -141,4 +140,33 @@ func (reservationRepository ReservationRepositoryPostgres) GetAllReservationsFor
 	}
 
 	return reservations, nil
+}
+
+func (reservationRepository ReservationRepositoryPostgres) GetAllReservedUsersForDoujin(ctx context.Context, melonbooksId int) ([]models.UserWithMetadata, error) {
+	var users []models.UserWithMetadata
+
+	err := pgx.BeginFunc(ctx, reservationRepository.postgresDb.Dbpool, func(tx pgx.Tx) error {
+		rows, err := tx.Query(ctx, `
+			WITH reserved_users AS (
+				SELECT discord_id FROM reservations WHERE melonbooks_id = $1
+			)
+			SELECT * FROM users WHERE discord_id IN (SELECT discord_id FROM reserved_users)
+		`, melonbooksId)
+		if err != nil {
+			return err
+		}
+
+		users, err = pgx.CollectRows(rows, pgx.RowToStructByName[models.UserWithMetadata])
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return users, nil
 }

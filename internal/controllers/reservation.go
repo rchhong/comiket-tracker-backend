@@ -32,6 +32,20 @@ func (reservationController ReservationController) getReservationsForUser(r *htt
 	return doujins, http.StatusOK, nil
 }
 
+func (reservationController ReservationController) getReservedUsersForDoujin(r *http.Request) (any, int, error) {
+	melonbooksId, parseErr := strconv.ParseInt(r.PathValue("melonbooksId"), 10, 64)
+	if parseErr != nil {
+		return nil, http.StatusBadRequest, parseErr
+	}
+
+	doujins, err := reservationController.reservationService.GetAllReservedUsersForDoujin(r.Context(), int(melonbooksId))
+	if err != nil {
+		return nil, err.Status(), err
+	}
+
+	return doujins, http.StatusOK, nil
+}
+
 func (reservationController ReservationController) createReservation(r *http.Request) (any, int, error) {
 	melonbooksId, parseErr := strconv.ParseInt(r.PathValue("melonbooksId"), 10, 64)
 	if parseErr != nil {
@@ -73,6 +87,7 @@ func (reservationController ReservationController) deleteReservation(r *http.Req
 }
 
 func (reservationController *ReservationController) RegisterReservationController(mux *http.ServeMux) {
+	utils.RegisterMethodToHTTPServer(mux, http.MethodGet, "/doujins/{melonbooksId}/reservations", reservationController.getReservedUsersForDoujin)
 	utils.RegisterMethodToHTTPServer(mux, http.MethodGet, "/users/{discordId}/reservations", reservationController.getReservationsForUser)
 	utils.RegisterMethodToHTTPServer(mux, http.MethodPost, "/doujins/{melonbooksId}/reservations/{discordId}", reservationController.createReservation)
 	utils.RegisterMethodToHTTPServer(mux, http.MethodDelete, "/doujins/{melonbooksId}/reservations/{discordId}", reservationController.deleteReservation)
