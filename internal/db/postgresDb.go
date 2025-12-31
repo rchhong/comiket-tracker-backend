@@ -13,7 +13,7 @@ type PostgresDB struct {
 }
 
 func InitializeDB(host string, port int, databaseName string, username string, password string) (*PostgresDB, error) {
-	database_url := fmt.Sprintf("postgres://%s:%s@comiket-db:5432/%s", os.Getenv("POSTGRES_USER"), os.Getenv("POSTGRES_PASSWORD"), os.Getenv("POSTGRES_DB"))
+	database_url := fmt.Sprintf("postgres://%s:%s@%s:%d/%s", username, password, host, port, databaseName)
 	dbpool, err := pgxpool.New(context.Background(), database_url)
 	if err != nil {
 		return nil, err
