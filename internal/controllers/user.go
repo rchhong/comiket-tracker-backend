@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -13,13 +12,11 @@ import (
 
 type UserController struct {
 	userService *service.UserService
-	prefix      string
 }
 
 func NewUserController(userService *service.UserService) *UserController {
 	return &UserController{
 		userService: userService,
-		prefix:      "/users",
 	}
 }
 
@@ -59,8 +56,7 @@ func (userController UserController) upsertUser(r *http.Request) (any, int, erro
 }
 
 func (userController UserController) RegisterUserController(mux *http.ServeMux) {
-	userPath := fmt.Sprintf("%s/{discordId}", userController.prefix)
-	utils.RegisterMethodToHTTPServer(mux, http.MethodGet, userPath, userController.getUserByDiscordId)
-	utils.RegisterMethodToHTTPServer(mux, http.MethodPut, userPath, userController.upsertUser)
+	utils.RegisterMethodToHTTPServer(mux, http.MethodGet, "/users/{discordId}", userController.getUserByDiscordId)
+	utils.RegisterMethodToHTTPServer(mux, http.MethodPut, "/users/{discordId}", userController.upsertUser)
 
 }

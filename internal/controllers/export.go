@@ -13,19 +13,17 @@ import (
 
 type ExportController struct {
 	exportService *service.ExportService
-	prefix        string
 }
 
 func NewExportController(exportService *service.ExportService) *ExportController {
 	return &ExportController{
 		exportService: exportService,
-		prefix:        "/admin",
 	}
 }
 
 // TODO: consider just moving this to a python script or something like that
 func (exportController ExportController) RegisterExportController(mux *http.ServeMux) {
-	mux.HandleFunc(fmt.Sprintf("%s/export", exportController.prefix), func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/admin/export", func(w http.ResponseWriter, r *http.Request) {
 		export, err := exportController.exportService.GenerateExport(r.Context())
 		if err != nil {
 			w.WriteHeader(err.Status())

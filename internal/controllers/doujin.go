@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -11,13 +10,11 @@ import (
 
 type DoujinController struct {
 	doujinService *service.DoujinService
-	prefix        string
 }
 
 func NewDoujinController(doujinService *service.DoujinService) *DoujinController {
 	return &DoujinController{
 		doujinService: doujinService,
-		prefix:        "/doujins",
 	}
 }
 
@@ -50,8 +47,7 @@ func (doujinController DoujinController) upsertDoujin(r *http.Request) (any, int
 }
 
 func (doujinController DoujinController) RegisterDoujinController(mux *http.ServeMux) {
-	doujinPath := fmt.Sprintf("%s/{melonbooksId}", doujinController.prefix)
-	utils.RegisterMethodToHTTPServer(mux, http.MethodGet, doujinPath, doujinController.getDoujinByMelonbooksId)
-	utils.RegisterMethodToHTTPServer(mux, http.MethodPut, doujinPath, doujinController.upsertDoujin)
+	utils.RegisterMethodToHTTPServer(mux, http.MethodGet, "/doujins/{melonbooksId}", doujinController.getDoujinByMelonbooksId)
+	utils.RegisterMethodToHTTPServer(mux, http.MethodPut, "/doujins/{melonbooksId}", doujinController.upsertDoujin)
 
 }
