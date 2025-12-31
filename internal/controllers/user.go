@@ -35,6 +35,16 @@ func (userController UserController) getUserByDiscordId(r *http.Request) (any, i
 
 }
 
+// TODO: filters
+func (userController UserController) getUsers(r *http.Request) (any, int, error) {
+	users, err := userController.userService.GetUsers(r.Context())
+	if err != nil {
+		return nil, err.Status(), err
+	}
+
+	return users, http.StatusOK, nil
+}
+
 func (userController UserController) upsertUser(r *http.Request) (any, int, error) {
 	discordId, parseErr := strconv.ParseInt(r.PathValue("discordId"), 10, 64)
 	if parseErr != nil {
@@ -61,6 +71,7 @@ func (userController UserController) upsertUser(r *http.Request) (any, int, erro
 
 func (userController UserController) RegisterUserController(mux *http.ServeMux) {
 	utils.RegisterMethodToHTTPServer(mux, http.MethodGet, "/users/{discordId}", userController.getUserByDiscordId)
+	utils.RegisterMethodToHTTPServer(mux, http.MethodGet, "/users", userController.getUsers)
 	utils.RegisterMethodToHTTPServer(mux, http.MethodPut, "/users/{discordId}", userController.upsertUser)
 
 }

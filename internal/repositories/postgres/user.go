@@ -74,6 +74,32 @@ func (userRepository *UserRepositoryPostgres) GetUserByDiscordId(ctx context.Con
 	return &user, nil
 }
 
+func (userRepository *UserRepositoryPostgres) GetUsers(ctx context.Context) ([]models.UserWithMetadata, error) {
+	var user []models.UserWithMetadata
+
+	err := pgx.BeginFunc(ctx, userRepository.postgresDb.Dbpool, func(tx pgx.Tx) error {
+		row, err := tx.Query(ctx, `
+			SELECT * FROM users
+		`)
+		if err != nil {
+			return err
+		}
+
+		user, err = pgx.CollectRows(row, pgx.RowToStructByName[models.UserWithMetadata])
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
 func (userRepository *UserRepositoryPostgres) UpdateUser(ctx context.Context, discordId int64, updatedUser models.User) (*models.UserWithMetadata, error) {
 	var user models.UserWithMetadata
 

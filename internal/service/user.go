@@ -20,6 +20,14 @@ func NewUserService(userRepository repositories.UserRepository) *UserService {
 	}
 }
 
+func (userService UserService) CreateUser(ctx context.Context, discordId int64, user models.User) (*models.UserWithMetadata, *models.ComiketBackendError) {
+	createdUser, err := userService.userRepository.CreateUser(ctx, discordId, user)
+	if err != nil {
+		return nil, &models.ComiketBackendError{Err: err, StatusCode: http.StatusInternalServerError}
+	}
+	return createdUser, nil
+}
+
 func (userService UserService) GetUserByDiscordId(ctx context.Context, discordId int64) (*models.UserWithMetadata, *models.ComiketBackendError) {
 	existingUser, err := userService.userRepository.GetUserByDiscordId(ctx, discordId)
 	if err != nil {
@@ -33,12 +41,13 @@ func (userService UserService) GetUserByDiscordId(ctx context.Context, discordId
 	return existingUser, nil
 }
 
-func (userService UserService) CreateUser(ctx context.Context, discordId int64, user models.User) (*models.UserWithMetadata, *models.ComiketBackendError) {
-	createdUser, err := userService.userRepository.CreateUser(ctx, discordId, user)
+func (userService UserService) GetUsers(ctx context.Context) ([]models.UserWithMetadata, *models.ComiketBackendError) {
+	users, err := userService.userRepository.GetUsers(ctx)
 	if err != nil {
 		return nil, &models.ComiketBackendError{Err: err, StatusCode: http.StatusInternalServerError}
 	}
-	return createdUser, nil
+
+	return users, nil
 }
 
 func (userService UserService) UpdateUser(ctx context.Context, discordId int64, user models.User) (*models.UserWithMetadata, *models.ComiketBackendError) {
