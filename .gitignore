@@ -29,6 +29,7 @@ tmp/
 .env
 
 **/dbdata/
-.aider*
+**/logs/
+deployments/docker_compose_deployment/
 config.yaml
 *.log

@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gocolly/colly/v2"
 	"github.com/rchhong/comiket-backend/internal/logging"
@@ -23,11 +24,17 @@ func (melonbooksScraper *MelonbooksScraper) ScrapeMelonbooksProduct(melonbooksPr
 	var scrapeError error
 
 	collector := colly.NewCollector()
+	collector.SetRequestTimeout(5 * time.Second)
 
 	melonbooksUrl := fmt.Sprintf("https://www.melonbooks.co.jp/detail/detail.php?product_id=%d&adult_view=1", melonbooksProductId)
 
 	melonbooksData.MelonbooksId = melonbooksProductId
 	melonbooksData.URL = melonbooksUrl
+
+	collector.OnError(func(r *colly.Response, err error) {
+		scrapeError = fmt.Errorf("Failed to scrape Melonbooks for Melonbooks Id %d: %s", melonbooksProductId, err.Error())
+	})
+
 	// Retrieve title
 	collector.OnHTML("div.item-header > h1", func(e *colly.HTMLElement) {
 		melonbooksData.Title = e.Text

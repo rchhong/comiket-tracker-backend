@@ -3,26 +3,57 @@ services:
     container_name: comiket-db
     image: postgres:17.5
     volumes:
-      - ./dbdata:${PGDATA}
-      - ../init/seed.sql:/docker-entrypoint-initdb.d/seed.sql
+      - ./docker_compose_deployment/dbdata:/var/lib/postgresql/17/docker
     ports:
       - 5432:5432
+    healthcheck:
+      test:
+        ["CMD", "pg_isready", "-d", "${POSTGRES_DB}", "-U", "${POSTGRES_USER}"]
+      start_period: 5s
+      start_interval: 1s
+      interval: 5s
     env_file:
       - ../.env
+
+  db-migrator:
+    container_name: comiket-db-migrator
+    build:
+      context: ..
+      dockerfile: ./build/db-migrator/Dockerfile
+    working_dir: /app
+    volumes:
+      - ./db-migrator/migrations/:/app/migrations/
+    environment:
+      GOOSE_DRIVER: postgres
+      GOOSE_DBSTRING: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@comiket-db:5432/${POSTGRES_DB}
+      GOOSE_MIGRATION_DIR: /app/migrations
+    env_file:
+      - ../.env
+    depends_on:
+      db:
+        condition: service_healthy
 
   backend:
     container_name: comiket-backend
     build:
       context: ..
-      dockerfile: ./build/Dockerfile
+      dockerfile: ./build/backend/Dockerfile
     working_dir: /app
     ports:
       - 3000:3000
     volumes:
-      - ../:/app
-      - ./logs:/app/logs
+      - ../cmd/:/app/cmd/
+      - ../internal/:/app/internal/
+      - ./docker_compose_deployment/logs:/app/logs
+      - ./backend/config.yaml:/app/config.yaml
+      - ./backend/.air.toml:/app/.air.toml
     env_file:
       - ../.env
+    depends_on:
+      db:
+        condition: service_healthy
+      db-migrator:
+        condition: service_completed_successfully
 
 volumes:
   dbdata:

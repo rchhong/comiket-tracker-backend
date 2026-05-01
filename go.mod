@@ -8,6 +8,7 @@ require (
 	github.com/gocolly/colly/v2 v2.2.0
 	github.com/jackc/pgx/v5 v5.7.5
 	github.com/stretchr/testify v1.11.1
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -37,5 +38,4 @@ require (
 	golang.org/x/text v0.24.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
