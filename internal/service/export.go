@@ -40,7 +40,7 @@ func (exportService ExportService) GenerateExport(ctx context.Context) ([][]stri
 	// "writing software is an iterative process"
 	users := make(map[string]bool)
 	for _, row := range rawRows {
-		users[row.DiscordName] = true
+		users[row.DiscordGlobalName] = true
 	}
 	sortedUsers := slices.Sorted(maps.Keys(users))
 
@@ -59,10 +59,10 @@ func (exportService ExportService) GenerateExport(ctx context.Context) ([][]stri
 			for _, user := range sortedUsers {
 				toAdd[user] = ""
 			}
-			toAdd[row.DiscordName] = "X"
+			toAdd[row.DiscordGlobalName] = "X"
 			outputRows[row.MelonbooksId] = toAdd
 		} else {
-			existingOutputRow[row.DiscordName] = "X"
+			existingOutputRow[row.DiscordGlobalName] = "X"
 		}
 	}
 

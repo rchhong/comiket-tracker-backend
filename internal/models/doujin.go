@@ -6,17 +6,18 @@ import (
 )
 
 type Doujin struct {
-	MelonbooksId    int      `json:"melonbooks_id"`
-	Title           string   `json:"title"`
-	PriceInYen      int      `json:"price_in_yen"`
-	PriceInUsd      float64  `json:"price_in_usd"`
-	IsR18           bool     `json:"is_r18"`
-	ImagePreviewURL string   `json:"image_preview_url"`
-	URL             string   `json:"url"`
-	Circle          string   `json:"circle"`
-	Authors         []string `json:"authors"`
-	Genres          []string `json:"genres"`
-	Events          []string `json:"events"`
+	MelonbooksId    int     `json:"melonbooks_id"`
+	Title           string  `json:"title"`
+	PriceInYen      int     `json:"price_in_yen"`
+	PriceInUsd      float64 `json:"price_in_usd"`
+	IsR18           bool    `json:"is_r18"`
+	ImagePreviewURL string  `json:"image_preview_url"`
+	// TODO: remove this field
+	URL     string   `json:"url"`
+	Circle  string   `json:"circle"`
+	Authors []string `json:"authors"`
+	Genres  []string `json:"genres"`
+	Events  []string `json:"events"`
 }
 
 type DoujinWithMetadata struct {

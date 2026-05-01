@@ -30,7 +30,7 @@ func (exportRepository ExportRepositoryPostgres) GetRawExportData(ctx context.Co
 				d.title,
 				d.price_in_yen,
 				d.price_in_usd,
-				u.discord_name
+				u.discord_global_name
 			FROM (reservations r
 				  LEFT JOIN doujins d on r.melonbooks_id = d.melonbooks_id
 				  LEFT JOIN users u ON u.discord_id = r.discord_id

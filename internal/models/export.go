@@ -7,5 +7,5 @@ type ExportRow struct {
 	Title        string  `json:"title"`
 	PriceInYen   int     `json:"price_in_yen"`
 	PriceInUsd   float64 `json:"price_in_usd"`
-	DiscordName  string  `json:"discord_name"`
+	DiscordGlobalName  string  `json:"discord_global_name"`
 }

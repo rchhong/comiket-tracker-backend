@@ -7,7 +7,6 @@ import (
 
 type User struct {
 	DiscordId         int    `json:"discord_id"`
-	DiscordName       string `json:"discord_name"`
 	DiscordGlobalName string `json:"discord_global_name"`
 }
 
@@ -18,5 +17,5 @@ type UserWithMetadata struct {
 }
 
 func (user User) String() string {
-	return fmt.Sprintf("{DiscordId: %d DiscordName: %s DiscordGlobalName: %s}\n", user.DiscordId, user.DiscordName, user.DiscordGlobalName)
+	return fmt.Sprintf("{DiscordId: %d DiscordGlobalName: %s}\n", user.DiscordId, user.DiscordGlobalName)
 }

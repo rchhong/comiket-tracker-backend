@@ -23,11 +23,11 @@ func (userRepository *UserRepositoryPostgres) CreateUser(ctx context.Context, di
 	err := pgx.BeginFunc(ctx, userRepository.postgresDb.Dbpool, func(tx pgx.Tx) error {
 		row, err := tx.Query(ctx, `
 			INSERT INTO users
-				(discord_id, discord_name, discord_global_name)
+				(discord_id, discord_global_name)
 			VALUES
 				($1, $2, $3)
 			RETURNING *
-			`, discordId, user.DiscordName, user.DiscordGlobalName)
+			`, discordId, user.DiscordGlobalName)
 
 		if err != nil {
 			return err
@@ -107,12 +107,11 @@ func (userRepository *UserRepositoryPostgres) UpdateUser(ctx context.Context, di
 		row, err := tx.Query(ctx, `
 			UPDATE users
 			SET
-				discord_name = $1,
-				discord_global_name = $2,
+				discord_global_name = $1,
 				updated_at = NOW()
 			WHERE discord_id = $3
 			RETURNING *
-		`, updatedUser.DiscordName, updatedUser.DiscordGlobalName, discordId)
+		`, updatedUser.DiscordGlobalName, discordId)
 
 		if err != nil {
 			return err
