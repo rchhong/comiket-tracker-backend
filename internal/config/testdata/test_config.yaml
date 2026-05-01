@@ -1,0 +1,15 @@
+app:
+  port: 3000
+
+logging:
+  logLevel: INFO
+  file:
+    logFilePath: "/app/logs/comiket_backend.log"
+
+db:
+  postgres:
+    host: comiket-db
+    port: 5432
+    databaseName: comiket
+    username: username
+    password: password

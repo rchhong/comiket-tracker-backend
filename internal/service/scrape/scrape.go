@@ -2,12 +2,12 @@ package scrape
 
 import (
 	"fmt"
-	"log"
 	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/gocolly/colly/v2"
+	"github.com/rchhong/comiket-backend/internal/logging"
 	"github.com/rchhong/comiket-backend/internal/service/scrape/dto"
 )
 
@@ -76,7 +76,7 @@ func (melonbooksScraper *MelonbooksScraper) ScrapeMelonbooksProduct(melonbooksPr
 			case "作品種別":
 				melonbooksData.IsR18 = c.ChildText("td") == "18禁"
 			default:
-				log.Printf("[WARNING] Ignoring metadataItem %s for melonbooksData %s", metadataItem, melonbooksUrl)
+				logging.Logger.Debug(fmt.Sprintf("Ignoring metadataItem %s for melonbooksData %s", metadataItem, melonbooksUrl))
 			}
 		})
 	})

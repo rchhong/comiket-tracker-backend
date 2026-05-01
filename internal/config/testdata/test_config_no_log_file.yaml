@@ -1,0 +1,13 @@
+app:
+  port: 3000
+
+logging:
+  logLevel: INFO
+
+db:
+  postgres:
+    host: comiket-db
+    port: 5432
+    databaseName: comiket
+    username: username
+    password: password

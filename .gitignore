@@ -30,3 +30,5 @@ tmp/
 
 **/dbdata/
 .aider*
+config.yaml
+*.log
