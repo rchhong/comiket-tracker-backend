@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/jackc/pgx/v5"
@@ -24,17 +25,18 @@ func NewReservationService(reservationRepository repositories.ReservationReposit
 	}
 }
 
-func (reservationService *ReservationService) CreateReservation(ctx context.Context, melonbooksId int, discordId int64, user models.User) (*models.ReservationWithMetadata, *models.ComiketBackendError) {
+func (reservationService *ReservationService) CreateReservation(ctx context.Context, melonbooksId int, discordId int64) (*models.ReservationWithMetadata, *models.ComiketBackendError) {
 	// Create user, doujin if they don't exist yet
-	_, err := reservationService.userService.UpsertUser(ctx, discordId, user)
-	if err != nil {
-		return nil, err
+	_, err := reservationService.userService.GetUserByDiscordId(ctx, discordId)
+	if err != nil && errors.Is(err, pgx.ErrNoRows) {
+		return nil, &models.ComiketBackendError{Err: fmt.Errorf("User with discordId %d not found.", discordId), StatusCode: http.StatusBadRequest}
 	}
-	_, err = reservationService.doujinService.UpsertDoujin(ctx, melonbooksId)
-	if err != nil {
-		return nil, err
+	_, err = reservationService.doujinService.GetDoujinByMelonbooksId(ctx, melonbooksId)
+	if err != nil && errors.Is(err, pgx.ErrNoRows) {
+		return nil, &models.ComiketBackendError{Err: fmt.Errorf("Doujin with melonbooksId %d not found.", melonbooksId), StatusCode: http.StatusBadRequest}
 	}
 
+	// This is a no-op, since nothing really needs to be updated about the reservation itself
 	existingReservation, repositoryErr := reservationService.reservationRepository.GetReservationByMelonbooksIdDiscordId(ctx, melonbooksId, discordId)
 	if existingReservation == nil {
 		if errors.Is(pgx.ErrNoRows, repositoryErr) {
@@ -51,12 +53,21 @@ func (reservationService *ReservationService) CreateReservation(ctx context.Cont
 }
 
 func (reservationService *ReservationService) GetAllReservationsForUser(ctx context.Context, discordId int64) ([]models.DoujinWithMetadata, *models.ComiketBackendError) {
-	reservations, err := reservationService.reservationRepository.GetAllReservationsForUser(ctx, discordId)
+	doujins, err := reservationService.reservationRepository.GetAllReservationsForUser(ctx, discordId)
 	if err != nil {
 		return nil, &models.ComiketBackendError{Err: err, StatusCode: http.StatusInternalServerError}
 	}
 
-	return reservations, nil
+	return doujins, nil
+}
+
+func (reservationService *ReservationService) GetAllReservedUsersForDoujin(ctx context.Context, melonbooksId int) ([]models.UserWithMetadata, *models.ComiketBackendError) {
+	users, err := reservationService.reservationRepository.GetAllReservedUsersForDoujin(ctx, melonbooksId)
+	if err != nil {
+		return nil, &models.ComiketBackendError{Err: err, StatusCode: http.StatusInternalServerError}
+	}
+
+	return users, nil
 }
 
 func (reservationService *ReservationService) DeleteReservation(ctx context.Context, melonbooksId int, discordId int64) *models.ComiketBackendError {

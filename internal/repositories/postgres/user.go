@@ -20,14 +20,7 @@ func NewUserRepositoryPostgres(postgresDb *db.PostgresDB) *UserRepositoryPostgre
 
 func (userRepository *UserRepositoryPostgres) CreateUser(ctx context.Context, discordId int64, user models.User) (*models.UserWithMetadata, error) {
 	var newUserWithMetadata models.UserWithMetadata
-
-	conn, err := userRepository.postgresDb.Dbpool.Acquire(ctx)
-	if err != nil {
-		return nil, err
-	}
-	defer conn.Conn().Close(ctx)
-
-	err = pgx.BeginFunc(ctx, conn, func(tx pgx.Tx) error {
+	err := pgx.BeginFunc(ctx, userRepository.postgresDb.Dbpool, func(tx pgx.Tx) error {
 		row, err := tx.Query(ctx, `
 			INSERT INTO users
 				(discord_id, discord_name, discord_global_name)
@@ -58,13 +51,7 @@ func (userRepository *UserRepositoryPostgres) CreateUser(ctx context.Context, di
 func (userRepository *UserRepositoryPostgres) GetUserByDiscordId(ctx context.Context, discordId int64) (*models.UserWithMetadata, error) {
 	var user models.UserWithMetadata
 
-	conn, err := userRepository.postgresDb.Dbpool.Acquire(ctx)
-	if err != nil {
-		return nil, err
-	}
-	defer conn.Conn().Close(ctx)
-
-	err = pgx.BeginFunc(ctx, conn, func(tx pgx.Tx) error {
+	err := pgx.BeginFunc(ctx, userRepository.postgresDb.Dbpool, func(tx pgx.Tx) error {
 		row, err := tx.Query(ctx, `
 			SELECT * FROM users WHERE discord_id = $1 LIMIT 1
 		`, discordId)
@@ -87,16 +74,36 @@ func (userRepository *UserRepositoryPostgres) GetUserByDiscordId(ctx context.Con
 	return &user, nil
 }
 
-func (userRepository *UserRepositoryPostgres) UpdateUser(ctx context.Context, discordId int64, updatedUser models.User) (*models.UserWithMetadata, error) {
-	var user models.UserWithMetadata
+func (userRepository *UserRepositoryPostgres) GetUsers(ctx context.Context) ([]models.UserWithMetadata, error) {
+	var user []models.UserWithMetadata
 
-	conn, err := userRepository.postgresDb.Dbpool.Acquire(ctx)
+	err := pgx.BeginFunc(ctx, userRepository.postgresDb.Dbpool, func(tx pgx.Tx) error {
+		row, err := tx.Query(ctx, `
+			SELECT * FROM users
+		`)
+		if err != nil {
+			return err
+		}
+
+		user, err = pgx.CollectRows(row, pgx.RowToStructByName[models.UserWithMetadata])
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+
 	if err != nil {
 		return nil, err
 	}
-	defer conn.Conn().Close(ctx)
 
-	err = pgx.BeginFunc(ctx, conn, func(tx pgx.Tx) error {
+	return user, nil
+}
+
+func (userRepository *UserRepositoryPostgres) UpdateUser(ctx context.Context, discordId int64, updatedUser models.User) (*models.UserWithMetadata, error) {
+	var user models.UserWithMetadata
+
+	err := pgx.BeginFunc(ctx, userRepository.postgresDb.Dbpool, func(tx pgx.Tx) error {
 		row, err := tx.Query(ctx, `
 			UPDATE users
 			SET
@@ -127,13 +134,7 @@ func (userRepository *UserRepositoryPostgres) UpdateUser(ctx context.Context, di
 }
 
 func (userRepository UserRepositoryPostgres) DeleteUser(ctx context.Context, discordId int64) error {
-	conn, err := userRepository.postgresDb.Dbpool.Acquire(ctx)
-	if err != nil {
-		return err
-	}
-	defer conn.Conn().Close(ctx)
-
-	return pgx.BeginFunc(ctx, conn, func(tx pgx.Tx) error {
+	return pgx.BeginFunc(ctx, userRepository.postgresDb.Dbpool, func(tx pgx.Tx) error {
 		_, err := tx.Exec(ctx, `
 			DELETE FROM users
 			WHERE discord_id = $1

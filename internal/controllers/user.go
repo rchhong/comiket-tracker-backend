@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -13,13 +12,11 @@ import (
 
 type UserController struct {
 	userService *service.UserService
-	prefix      string
 }
 
 func NewUserController(userService *service.UserService) *UserController {
 	return &UserController{
 		userService: userService,
-		prefix:      "/users",
 	}
 }
 
@@ -38,6 +35,16 @@ func (userController UserController) getUserByDiscordId(r *http.Request) (any, i
 
 }
 
+// TODO: filters
+func (userController UserController) getUsers(r *http.Request) (any, int, error) {
+	users, err := userController.userService.GetUsers(r.Context())
+	if err != nil {
+		return nil, err.Status(), err
+	}
+
+	return users, http.StatusOK, nil
+}
+
 func (userController UserController) upsertUser(r *http.Request) (any, int, error) {
 	discordId, parseErr := strconv.ParseInt(r.PathValue("discordId"), 10, 64)
 	if parseErr != nil {
@@ -50,17 +57,21 @@ func (userController UserController) upsertUser(r *http.Request) (any, int, erro
 		return nil, http.StatusBadRequest, parseErr
 	}
 
-	user, err := userController.userService.UpsertUser(r.Context(), discordId, responseBody)
+	user, wasCreated, err := userController.userService.UpsertUser(r.Context(), discordId, responseBody)
 	if err != nil {
 		return nil, err.Status(), err
 	}
 
-	return user, http.StatusAccepted, nil
+	if wasCreated {
+		return user, http.StatusCreated, nil
+	}
+
+	return user, http.StatusOK, nil
 }
 
 func (userController UserController) RegisterUserController(mux *http.ServeMux) {
-	userPath := fmt.Sprintf("%s/{discordId}", userController.prefix)
-	utils.RegisterMethodToHTTPServer(mux, http.MethodGet, userPath, userController.getUserByDiscordId)
-	utils.RegisterMethodToHTTPServer(mux, http.MethodPut, userPath, userController.upsertUser)
+	utils.RegisterMethodToHTTPServer(mux, http.MethodGet, "/users/{discordId}", userController.getUserByDiscordId)
+	utils.RegisterMethodToHTTPServer(mux, http.MethodGet, "/users", userController.getUsers)
+	utils.RegisterMethodToHTTPServer(mux, http.MethodPut, "/users/{discordId}", userController.upsertUser)
 
 }

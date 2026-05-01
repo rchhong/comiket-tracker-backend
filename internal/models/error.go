@@ -12,3 +12,7 @@ func (comiketBackendError ComiketBackendError) Status() int {
 func (comiketBackendError ComiketBackendError) Error() string {
 	return comiketBackendError.Err.Error()
 }
+
+func (comiketBackendError ComiketBackendError) Unwrap() error {
+	return comiketBackendError.Err
+}

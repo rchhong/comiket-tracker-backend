@@ -21,13 +21,7 @@ func NewDoujinRepositoryPostgres(postgresDb *db.PostgresDB) *DoujinRepositoryPos
 func (doujinRepository *DoujinRepositoryPostgres) CreateDoujin(ctx context.Context, doujin models.Doujin) (*models.DoujinWithMetadata, error) {
 	var newDoujinWithMetadata models.DoujinWithMetadata
 
-	conn, err := doujinRepository.postgresDb.Dbpool.Acquire(ctx)
-	if err != nil {
-		return nil, err
-	}
-	defer conn.Conn().Close(ctx)
-
-	err = pgx.BeginFunc(ctx, conn, func(tx pgx.Tx) error {
+	err := pgx.BeginFunc(ctx, doujinRepository.postgresDb.Dbpool, func(tx pgx.Tx) error {
 		row, err := tx.Query(ctx, `
 			INSERT INTO doujins
 			(
@@ -90,18 +84,36 @@ func (doujinRepository *DoujinRepositoryPostgres) CreateDoujin(ctx context.Conte
 	return &newDoujinWithMetadata, nil
 }
 
-// TODO: Create method to retrieve all doujins
+func (doujinRepository *DoujinRepositoryPostgres) GetDoujins(ctx context.Context) ([]models.DoujinWithMetadata, error) {
+	var doujins []models.DoujinWithMetadata
+
+	err := pgx.BeginFunc(ctx, doujinRepository.postgresDb.Dbpool, func(tx pgx.Tx) error {
+		rows, err := tx.Query(ctx, `
+			SELECT * FROM doujins
+		`)
+		if err != nil {
+			return err
+		}
+
+		doujins, err = pgx.CollectRows(rows, pgx.RowToStructByName[models.DoujinWithMetadata])
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return doujins, nil
+}
 
 func (doujinRepository *DoujinRepositoryPostgres) GetDoujinByMelonbooksId(ctx context.Context, melonbooksId int) (*models.DoujinWithMetadata, error) {
 	var doujin models.DoujinWithMetadata
 
-	conn, err := doujinRepository.postgresDb.Dbpool.Acquire(ctx)
-	if err != nil {
-		return nil, err
-	}
-	defer conn.Conn().Close(ctx)
-
-	err = pgx.BeginFunc(ctx, conn, func(tx pgx.Tx) error {
+	err := pgx.BeginFunc(ctx, doujinRepository.postgresDb.Dbpool, func(tx pgx.Tx) error {
 		row, err := tx.Query(ctx, `
 			SELECT * FROM doujins WHERE melonbooks_id = $1
 		`, melonbooksId)
@@ -127,13 +139,7 @@ func (doujinRepository *DoujinRepositoryPostgres) GetDoujinByMelonbooksId(ctx co
 func (doujinRepository *DoujinRepositoryPostgres) UpdateDoujin(ctx context.Context, melonbooksId int, updatedDoujin models.Doujin) (*models.DoujinWithMetadata, error) {
 	var doujin models.DoujinWithMetadata
 
-	conn, err := doujinRepository.postgresDb.Dbpool.Acquire(ctx)
-	if err != nil {
-		return nil, err
-	}
-	defer conn.Conn().Close(ctx)
-
-	err = pgx.BeginFunc(ctx, conn, func(tx pgx.Tx) error {
+	err := pgx.BeginFunc(ctx, doujinRepository.postgresDb.Dbpool, func(tx pgx.Tx) error {
 		row, err := tx.Query(ctx, `
 			UPDATE doujins
 			SET
@@ -183,13 +189,7 @@ func (doujinRepository *DoujinRepositoryPostgres) UpdateDoujin(ctx context.Conte
 }
 
 func (doujinRepository DoujinRepositoryPostgres) DeleteDoujin(ctx context.Context, melonbooksId int) error {
-	conn, err := doujinRepository.postgresDb.Dbpool.Acquire(ctx)
-	if err != nil {
-		return err
-	}
-	defer conn.Conn().Close(ctx)
-
-	return pgx.BeginFunc(ctx, conn, func(tx pgx.Tx) error {
+	return pgx.BeginFunc(ctx, doujinRepository.postgresDb.Dbpool, func(tx pgx.Tx) error {
 		_, err := tx.Exec(ctx, `
 			DELETE FROM doujins
 			WHERE melonbooks_id = $1

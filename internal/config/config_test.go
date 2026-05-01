@@ -20,7 +20,8 @@ func TestLoadConfigFromFile(t *testing.T) {
 	assert.Equal(config.Db.Postgres.DatabaseName, "comiket")
 	assert.Equal(config.Db.Postgres.Username, "username")
 	assert.Equal(config.Db.Postgres.Password, "password")
-
+	assert.Equal(config.Db.Postgres.PoolMinConnections, 5)
+	assert.Equal(config.Db.Postgres.PoolMaxConnections, 50)
 }
 
 func TestLoadConfigFromFileNoLoggingFile(t *testing.T) {
@@ -36,5 +37,6 @@ func TestLoadConfigFromFileNoLoggingFile(t *testing.T) {
 	assert.Equal(config.Db.Postgres.DatabaseName, "comiket")
 	assert.Equal(config.Db.Postgres.Username, "username")
 	assert.Equal(config.Db.Postgres.Password, "password")
-
+	assert.Equal(config.Db.Postgres.PoolMinConnections, 5)
+	assert.Equal(config.Db.Postgres.PoolMaxConnections, 50)
 }

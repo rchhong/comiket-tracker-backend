@@ -21,13 +21,7 @@ func NewExportRepositoryPostgres(postgresDb *db.PostgresDB) *ExportRepositoryPos
 func (exportRepository ExportRepositoryPostgres) GetRawExportData(ctx context.Context) ([]models.ExportRow, error) {
 	var exportRows []models.ExportRow
 
-	conn, err := exportRepository.postgresDb.Dbpool.Acquire(ctx)
-	if err != nil {
-		return nil, err
-	}
-	defer conn.Conn().Close(ctx)
-
-	err = pgx.BeginFunc(ctx, conn, func(tx pgx.Tx) error {
+	err := pgx.BeginFunc(ctx, exportRepository.postgresDb.Dbpool, func(tx pgx.Tx) error {
 		rows, err := tx.Query(ctx, `
 			SELECT
 				r.melonbooks_id,

@@ -20,6 +20,14 @@ func NewUserService(userRepository repositories.UserRepository) *UserService {
 	}
 }
 
+func (userService UserService) CreateUser(ctx context.Context, discordId int64, user models.User) (*models.UserWithMetadata, *models.ComiketBackendError) {
+	createdUser, err := userService.userRepository.CreateUser(ctx, discordId, user)
+	if err != nil {
+		return nil, &models.ComiketBackendError{Err: err, StatusCode: http.StatusInternalServerError}
+	}
+	return createdUser, nil
+}
+
 func (userService UserService) GetUserByDiscordId(ctx context.Context, discordId int64) (*models.UserWithMetadata, *models.ComiketBackendError) {
 	existingUser, err := userService.userRepository.GetUserByDiscordId(ctx, discordId)
 	if err != nil {
@@ -33,12 +41,13 @@ func (userService UserService) GetUserByDiscordId(ctx context.Context, discordId
 	return existingUser, nil
 }
 
-func (userService UserService) CreateUser(ctx context.Context, discordId int64, user models.User) (*models.UserWithMetadata, *models.ComiketBackendError) {
-	createdUser, err := userService.userRepository.CreateUser(ctx, discordId, user)
+func (userService UserService) GetUsers(ctx context.Context) ([]models.UserWithMetadata, *models.ComiketBackendError) {
+	users, err := userService.userRepository.GetUsers(ctx)
 	if err != nil {
 		return nil, &models.ComiketBackendError{Err: err, StatusCode: http.StatusInternalServerError}
 	}
-	return createdUser, nil
+
+	return users, nil
 }
 
 func (userService UserService) UpdateUser(ctx context.Context, discordId int64, user models.User) (*models.UserWithMetadata, *models.ComiketBackendError) {
@@ -49,19 +58,18 @@ func (userService UserService) UpdateUser(ctx context.Context, discordId int64, 
 	return updatedUser, nil
 }
 
-func (userService UserService) UpsertUser(ctx context.Context, discordId int64, user models.User) (*models.UserWithMetadata, *models.ComiketBackendError) {
-	_, err := userService.GetUserByDiscordId(ctx, discordId)
-	if err == nil {
-		return userService.UpdateUser(ctx, discordId, user)
+func (userService UserService) UpsertUser(ctx context.Context, discordId int64, user models.User) (*models.UserWithMetadata, bool, *models.ComiketBackendError) {
+	existingUser, err := userService.GetUserByDiscordId(ctx, discordId)
+	if existingUser != nil {
+		updatedUser, err := userService.UpdateUser(ctx, discordId, user)
+		return updatedUser, false, err
 	}
 
-	var statusError models.ComiketBackendError
-	if errors.As(err, &statusError) {
-		if statusError.StatusCode == http.StatusNotFound {
-			return userService.CreateUser(ctx, discordId, user)
-		}
+	if errors.Is(err, pgx.ErrNoRows) {
+		createdUser, err := userService.CreateUser(ctx, discordId, user)
+		return createdUser, true, err
 	}
-	return nil, err
+	return nil, false, err
 }
 
 func (userService UserService) DeleteUser(ctx context.Context, discordId int64) *models.ComiketBackendError {

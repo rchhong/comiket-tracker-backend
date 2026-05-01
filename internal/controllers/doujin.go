@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -11,13 +10,11 @@ import (
 
 type DoujinController struct {
 	doujinService *service.DoujinService
-	prefix        string
 }
 
 func NewDoujinController(doujinService *service.DoujinService) *DoujinController {
 	return &DoujinController{
 		doujinService: doujinService,
-		prefix:        "/doujins",
 	}
 }
 
@@ -32,7 +29,16 @@ func (doujinController DoujinController) getDoujinByMelonbooksId(r *http.Request
 		return nil, err.Status(), err
 	}
 
-	return doujin, http.StatusCreated, nil
+	return doujin, http.StatusOK, nil
+}
+
+func (doujinController DoujinController) getDoujins(r *http.Request) (any, int, error) {
+	doujins, err := doujinController.doujinService.GetDoujins(r.Context())
+	if err != nil {
+		return nil, err.Status(), err
+	}
+
+	return doujins, http.StatusOK, nil
 }
 
 func (doujinController DoujinController) upsertDoujin(r *http.Request) (any, int, error) {
@@ -41,17 +47,21 @@ func (doujinController DoujinController) upsertDoujin(r *http.Request) (any, int
 		return nil, http.StatusBadRequest, parseErr
 	}
 
-	doujin, err := doujinController.doujinService.UpsertDoujin(r.Context(), int(melonbooksId))
+	doujin, wasCreated, err := doujinController.doujinService.UpsertDoujin(r.Context(), int(melonbooksId))
 	if err != nil {
 		return nil, err.Status(), err
 	}
 
-	return doujin, http.StatusAccepted, nil
+	if wasCreated {
+		return doujin, http.StatusCreated, nil
+	}
+
+	return doujin, http.StatusOK, nil
 }
 
 func (doujinController DoujinController) RegisterDoujinController(mux *http.ServeMux) {
-	doujinPath := fmt.Sprintf("%s/{melonbooksId}", doujinController.prefix)
-	utils.RegisterMethodToHTTPServer(mux, http.MethodGet, doujinPath, doujinController.getDoujinByMelonbooksId)
-	utils.RegisterMethodToHTTPServer(mux, http.MethodPut, doujinPath, doujinController.upsertDoujin)
+	utils.RegisterMethodToHTTPServer(mux, http.MethodGet, "/doujins/{melonbooksId}", doujinController.getDoujinByMelonbooksId)
+	utils.RegisterMethodToHTTPServer(mux, http.MethodGet, "/doujins", doujinController.getDoujins)
+	utils.RegisterMethodToHTTPServer(mux, http.MethodPut, "/doujins/{melonbooksId}", doujinController.upsertDoujin)
 
 }
