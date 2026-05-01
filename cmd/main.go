@@ -26,7 +26,7 @@ func main() {
 func run() error {
 	mux := http.NewServeMux()
 
-	configPath := "/app/cmd/config.yaml"
+	configPath := "/app/config.yaml"
 	config, err := config.LoadConfigFromFile(configPath)
 	if err != nil {
 		return fmt.Errorf("Unable to load application configuration from file: %v", err)
